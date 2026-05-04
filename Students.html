@@ -3,99 +3,64 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BSUT - Student Portal</title>
+    <title>BSUT Student Portal</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Merriweather:wght@700&display=swap');
-        
-        body { font-family: 'Inter', sans-serif; margin: 0; overflow-x: hidden; }
-        
-        /* تصميم صفحة الدخول */
-        #login-page {
-            background: linear-gradient(rgba(15, 23, 42, 0.8), rgba(15, 23, 42, 0.8)), 
-                        url('https://images.unsplash.com/photo-1562774053-701939374585?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80');
-            background-size: cover; background-position: center; min-height: 100vh;
-            display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px;
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
+        body { font-family: 'Inter', sans-serif; background: #0f172a; }
+        .login-bg {
+            background: linear-gradient(rgba(15, 23, 42, 0.85), rgba(15, 23, 42, 0.85)), 
+                        url('https://images.unsplash.com/photo-1541339907198-e08756defe93?auto=format&fit=crop&w=1920&q=80');
+            background-size: cover; background-position: center;
         }
-
-        .login-card { background: white; border-radius: 20px; width: 100%; max-width: 450px; padding: 40px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); }
-        .hero-title { font-family: 'Merriweather', serif; color: white; font-size: 3rem; text-align: center; line-height: 1.2; }
-        .hero-subtitle { color: #60a5fa; font-weight: 600; margin-bottom: 5px; text-align: center; text-transform: uppercase; letter-spacing: 2px; }
-        
-        /* تصميم لوحة التحكم */
-        .sidebar-item { transition: all 0.3s; cursor: pointer; display: flex; align-items: center; gap: 12px; padding: 12px 20px; border-radius: 10px; color: #94a3b8; font-weight: 500; margin-bottom: 8px; }
-        .sidebar-item:hover { background: rgba(59, 130, 246, 0.1); color: #3b82f6; }
-        .sidebar-item.active { background: #3b82f6; color: white; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3); }
-        
-        .card { background: white; border-radius: 15px; border: 1px solid #e2e8f0; padding: 25px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); transition: transform 0.2s; }
-        .card:hover { transform: translateY(-5px); }
-        
         .hidden { display: none !important; }
     </style>
 </head>
-<body class="bg-slate-50">
+<body>
 
-    <div id="login-page">
-        <p class="hero-subtitle">Beni Suef Technological University</p>
-        <h1 class="hero-title mb-8">Business Administration</h1>
-
-        <div class="login-card">
-            <div class="text-center mb-8">
-                <h2 class="text-2xl font-bold text-slate-800">Student Portal</h2>
-                <p class="text-slate-500 text-sm mt-2">Enter your academic credentials</p>
-            </div>
+    <div id="login-page" class="login-bg min-h-screen flex items-center justify-center p-6 text-white">
+        <div class="w-full max-w-md bg-white rounded-3xl p-10 shadow-2xl text-slate-900">
+            <h2 class="text-center text-3xl font-black mb-2 italic text-slate-900">BSUT <span class="text-blue-600">PORTAL</span></h2>
+            <p class="text-center text-slate-500 mb-8 font-medium">سجل دخولك برقمك الجامعي</p>
             
-            <div class="space-y-6">
-                <div>
-                    <label class="block text-xs font-bold text-slate-500 uppercase mb-2 ml-1">Full Name</label>
-                    <div class="relative">
-                        <i class="far fa-user absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
-                        <input type="text" id="std-name" placeholder="Name as per ID" class="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all">
-                    </div>
-                </div>
+            <div class="space-y-5">
+                <input type="text" id="std-name" placeholder="الاسم بالكامل (كما في الكشف)" class="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-blue-500 transition-all text-right">
+                <input type="text" id="std-id" placeholder="رقم الكود (مثال: MK1000)" class="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-blue-500 transition-all text-right">
                 
-                <div>
-                    <label class="block text-xs font-bold text-slate-500 uppercase mb-2 ml-1">University ID</label>
-                    <div class="relative">
-                        <i class="fas fa-id-card absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
-                        <input type="text" id="std-id" placeholder="2025XXXXX" class="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all">
-                    </div>
-                </div>
-
-                <button onclick="loginStudent()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl shadow-lg shadow-blue-200 transition-all active:scale-95">
-                    <i class="fas fa-sign-in-alt mr-2"></i> Access My Portal
+                <button onclick="login()" class="w-full bg-slate-900 text-white py-4 rounded-2xl font-bold text-lg hover:bg-blue-600 transition-all shadow-xl">
+                    دخول النظام
                 </button>
             </div>
+            <p id="msg" class="text-red-500 text-sm mt-4 text-center font-bold"></p>
         </div>
     </div>
 
-    <div id="main-portal" class="hidden flex min-h-screen">
-        <aside class="w-72 bg-slate-900 text-white flex flex-col p-6 fixed h-full shadow-2xl">
-            <div class="mb-10 px-2 border-l-4 border-blue-500 pl-4">
-                <h1 class="text-xl font-black tracking-tight">BSUT <span class="text-blue-500">ADMIN</span></h1>
-                <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1">Management System</p>
-            </div>
-            
-            <nav class="flex-1 space-y-2">
-                <div onclick="switchTab('dashboard', this)" class="sidebar-item active">
-                    <i class="fas fa-columns w-5"></i> Dashboard
-                </div>
-                <div onclick="switchTab('personal', this)" class="sidebar-item">
-                    <i class="fas fa-user-graduate w-5"></i> Profile Info
-                </div>
+    <div id="main-portal" class="hidden min-h-screen flex text-white">
+        <aside class="w-72 bg-slate-900 border-r border-slate-800 p-8">
+            <h1 class="text-2xl font-black mb-10 text-blue-500 italic">BTU PORTAL</h1>
+            <nav class="space-y-4">
+                <div class="p-4 bg-blue-600 rounded-xl font-bold cursor-pointer"><i class="fas fa-home ml-3"></i> لوحة التحكم</div>
+                <div onclick="location.reload()" class="p-4 text-slate-400 hover:text-red-400 cursor-pointer transition-all"><i class="fas fa-sign-out-alt ml-3"></i> خروج</div>
             </nav>
-
-            <div class="mt-auto pt-6 border-t border-slate-800">
-                <div onclick="location.reload()" class="sidebar-item text-red-400 hover:bg-red-500/10">
-                    <i class="fas fa-power-off w-5"></i> Log Out
-                </div>
-            </div>
         </aside>
 
-        <main class="flex-1 ml-72 p-12">
-            <div id="dynamic-content" class="max-w-5xl mx-auto">
+        <main class="flex-1 p-12 bg-slate-950">
+            <h1 id="welcome" class="text-4xl font-black mb-8"></h1>
+            <div class="grid grid-cols-3 gap-6">
+                <div class="bg-slate-900 p-8 rounded-3xl border border-slate-800 shadow-xl">
+                    <p class="text-slate-500 text-xs font-bold uppercase mb-2">القسم</p>
+                    <h2 id="dept" class="text-2xl font-bold"></h2>
                 </div>
+                <div class="bg-slate-900 p-8 rounded-3xl border border-slate-800 shadow-xl border-b-4 border-b-blue-600">
+                    <p class="text-slate-500 text-xs font-bold uppercase mb-2">السنة الدراسية</p>
+                    <h2 id="year" class="text-2xl font-bold"></h2>
+                </div>
+                <div class="bg-slate-900 p-8 rounded-3xl border border-slate-800 shadow-xl">
+                    <p class="text-slate-500 text-xs font-bold uppercase mb-2">رقم الكود</p>
+                    <h2 id="code" class="text-2xl font-bold"></h2>
+                </div>
+            </div>
         </main>
     </div>
 
@@ -103,7 +68,6 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js";
         import { getDatabase, ref, get, child } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-database.js";
 
-        // بيانات Firebase الخاصة بك من الصورة
         const firebaseConfig = {
             apiKey: "AIzaSyBwg2LRk5wbTMuYNoqoP3Pd5zlOvgXBEIY",
             authDomain: "btu-portal.firebaseapp.com",
@@ -116,88 +80,33 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
-        let studentInfo = null;
 
-        // وظيفة تسجيل الدخول
-        window.loginStudent = async function() {
-            const nameInp = document.getElementById('std-name').value.trim();
-            const idInp = document.getElementById('std-id').value.trim();
-            
-            if(!nameInp || !idInp) return alert("Please fill all fields");
+        window.login = async function() {
+            const name = document.getElementById('std-name').value.trim();
+            const id = document.getElementById('std-id').value.trim();
+            const msg = document.getElementById('msg');
 
-            const dbRef = ref(db);
+            if(!name || !id) return;
+            msg.innerText = "جاري التحقق...";
+
             try {
-                const snapshot = await get(child(dbRef, 'students'));
-                if (snapshot.exists()) {
-                    const data = snapshot.val();
-                    // البحث في السحابة
-                    const student = Object.values(data).find(s => 
-                        s.name.toLowerCase() === nameInp.toLowerCase() && String(s.id) === idInp
+                const snap = await get(child(ref(db), 'students'));
+                if(snap.exists()){
+                    const student = Object.values(snap.val()).find(s => 
+                        s.name.toLowerCase() === name.toLowerCase() && s.id === id
                     );
 
-                    if (student) {
-                        studentInfo = student;
+                    if(student){
                         document.getElementById('login-page').classList.add('hidden');
                         document.getElementById('main-portal').classList.remove('hidden');
-                        switchTab('dashboard', document.querySelector('.sidebar-item'));
-                    } else {
-                        alert("Invalid Login. Not found in Cloud Database.");
-                    }
-                } else {
-                    alert("No data available. Admin must upload students first.");
+                        document.getElementById('welcome').innerText = "أهلاً بك، " + student.name;
+                        document.getElementById('dept').innerText = student.dept;
+                        document.getElementById('year').innerText = student.year;
+                        document.getElementById('code').innerText = student.id;
+                    } else { msg.innerText = "الاسم أو الكود غير صحيح"; }
                 }
-            } catch (err) {
-                alert("Connection Error. Check internet.");
-            }
-        };
-
-        // وظيفة تبديل الصفحات
-        window.switchTab = function(tab, el) {
-            document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
-            el.classList.add('active');
-            const container = document.getElementById('dynamic-content');
-
-            if (tab === 'dashboard') {
-                container.innerHTML = `
-                    <div class="mb-10">
-                        <h1 class="text-4xl font-black text-slate-900">Welcome, ${studentInfo.name.split(' ')[0]}! 👋</h1>
-                        <p class="text-slate-500 mt-2 font-medium italic">Academic Year 2025/2026</p>
-                    </div>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <div class="card bg-gradient-to-br from-blue-600 to-blue-700 text-white border-none">
-                            <p class="text-xs font-bold uppercase opacity-80">Cumulative GPA</p>
-                            <h2 class="text-5xl font-black mt-4">${studentInfo.gpa || '0.00'}</h2>
-                        </div>
-                        <div class="card">
-                            <p class="text-xs font-bold text-slate-400 uppercase">Department</p>
-                            <h2 class="text-xl font-bold text-slate-800 mt-2">${studentInfo.dept}</h2>
-                        </div>
-                        <div class="card">
-                            <p class="text-xs font-bold text-slate-400 uppercase">Student ID</p>
-                            <h2 class="text-xl font-bold text-slate-800 mt-2">#${studentInfo.id}</h2>
-                        </div>
-                    </div>`;
-            } else if (tab === 'personal') {
-                container.innerHTML = `
-                    <div class="mb-10"><h1 class="text-3xl font-black text-slate-900">Profile Information</h1></div>
-                    <div class="card p-10 bg-white">
-                        <div class="flex items-center gap-8 mb-10 pb-10 border-b border-slate-100">
-                            <div class="w-24 h-24 rounded-2xl bg-blue-100 text-blue-600 flex items-center justify-center text-4xl font-black shadow-inner">
-                                ${studentInfo.name[0]}
-                            </div>
-                            <div>
-                                <h2 class="text-3xl font-bold text-slate-900">${studentInfo.name}</h2>
-                                <p class="text-blue-500 font-bold mt-1">${studentInfo.dept} Department</p>
-                            </div>
-                        </div>
-                        <div class="grid grid-cols-2 gap-y-8">
-                            <div><p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Phone Number</p><p class="text-lg font-semibold">${studentInfo.phone || 'N/A'}</p></div>
-                            <div><p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Academic Level</p><p class="text-lg font-semibold">${studentInfo.level || 'Year 1'}</p></div>
-                            <div><p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Registration Status</p><span class="inline-block mt-1 bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-bold">Active</span></div>
-                        </div>
-                    </div>`;
-            }
-        };
+            } catch(e) { msg.innerText = "خطأ في الاتصال بالسحابة"; }
+        }
     </script>
 </body>
 </html>
