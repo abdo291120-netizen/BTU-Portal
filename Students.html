@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ar">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,73 +8,94 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Merriweather:wght@700&display=swap');
+        
         body { font-family: 'Inter', sans-serif; margin: 0; overflow-x: hidden; }
+        
+        /* تصميم صفحة الدخول */
         #login-page {
-            background: linear-gradient(rgba(30, 41, 59, 0.7), rgba(30, 41, 59, 0.7)), 
+            background: linear-gradient(rgba(15, 23, 42, 0.8), rgba(15, 23, 42, 0.8)), 
                         url('https://images.unsplash.com/photo-1562774053-701939374585?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80');
             background-size: cover; background-position: center; min-height: 100vh;
             display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px;
         }
-        .login-card { background: white; border-radius: 16px; width: 100%; max-width: 450px; padding: 40px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); }
-        .hero-title { font-family: 'Merriweather', serif; color: white; font-size: 3.5rem; margin-bottom: 0.5rem; text-align: center; }
-        .hero-subtitle { color: #bfdbfe; font-weight: 500; margin-bottom: 0.5rem; text-align: center; }
-        .portal-tag { color: #3b82f6; font-weight: 700; letter-spacing: 0.1em; font-size: 0.8rem; margin-bottom: 2rem; }
-        .sidebar-item { transition: all 0.2s; cursor: pointer; display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: 8px; color: #64748b; font-weight: 500; margin-bottom: 4px; }
-        .sidebar-item:hover { background-color: #f1f5f9; color: #2563eb; }
-        .sidebar-item.active { background-color: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe; }
-        .card { background: white; border-radius: 12px; border: 1px solid #e2e8f0; padding: 24px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
-        .stat-label { font-size: 0.7rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.025em; }
+
+        .login-card { background: white; border-radius: 20px; width: 100%; max-width: 450px; padding: 40px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); }
+        .hero-title { font-family: 'Merriweather', serif; color: white; font-size: 3rem; text-align: center; line-height: 1.2; }
+        .hero-subtitle { color: #60a5fa; font-weight: 600; margin-bottom: 5px; text-align: center; text-transform: uppercase; letter-spacing: 2px; }
+        
+        /* تصميم لوحة التحكم */
+        .sidebar-item { transition: all 0.3s; cursor: pointer; display: flex; align-items: center; gap: 12px; padding: 12px 20px; border-radius: 10px; color: #94a3b8; font-weight: 500; margin-bottom: 8px; }
+        .sidebar-item:hover { background: rgba(59, 130, 246, 0.1); color: #3b82f6; }
+        .sidebar-item.active { background: #3b82f6; color: white; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3); }
+        
+        .card { background: white; border-radius: 15px; border: 1px solid #e2e8f0; padding: 25px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); transition: transform 0.2s; }
+        .card:hover { transform: translateY(-5px); }
+        
+        .hidden { display: none !important; }
     </style>
 </head>
 <body class="bg-slate-50">
 
     <div id="login-page">
-        <h1 class="hero-title">Business Administration</h1>
-        <p class="hero-subtitle text-xl">Beni Suef Technological University</p>
-        <p class="portal-tag">ACADEMIC PORTAL</p>
+        <p class="hero-subtitle">Beni Suef Technological University</p>
+        <h1 class="hero-title mb-8">Business Administration</h1>
 
         <div class="login-card">
-            <h2 class="text-2xl font-bold text-center text-slate-800 mb-2">Student Sign In</h2>
-            <p class="text-center text-slate-500 text-sm mb-8">Secure access to your academic records</p>
+            <div class="text-center mb-8">
+                <h2 class="text-2xl font-bold text-slate-800">Student Portal</h2>
+                <p class="text-slate-500 text-sm mt-2">Enter your academic credentials</p>
+            </div>
             
-            <div class="space-y-5">
+            <div class="space-y-6">
                 <div>
-                    <label class="block text-sm font-semibold text-slate-700 mb-1">Full Name</label>
-                    <input type="text" id="std-name" placeholder="Enter your full name" class="w-full px-4 py-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all">
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-2 ml-1">Full Name</label>
+                    <div class="relative">
+                        <i class="far fa-user absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                        <input type="text" id="std-name" placeholder="Name as per ID" class="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all">
+                    </div>
                 </div>
+                
                 <div>
-                    <label class="block text-sm font-semibold text-slate-700 mb-1">University ID Number</label>
-                    <input type="text" id="std-id" placeholder="e.g. 20230001" class="w-full px-4 py-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all">
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-2 ml-1">University ID</label>
+                    <div class="relative">
+                        <i class="fas fa-id-card absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                        <input type="text" id="std-id" placeholder="2025XXXXX" class="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all">
+                    </div>
                 </div>
-                <div>
-                    <label class="block text-sm font-semibold text-slate-700 mb-1">Department</label>
-                    <select id="std-dept" class="w-full px-4 py-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all bg-white text-slate-400">
-                        <option value="">Select your department</option>
-                        <option value="Marketing">Marketing</option>
-                    </select>
-                </div>
-                <button id="login-btn" class="w-full bg-[#111827] text-white font-bold py-3 rounded-lg hover:bg-slate-800 transition-all mt-4">Sign In</button>
+
+                <button onclick="loginStudent()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl shadow-lg shadow-blue-200 transition-all active:scale-95">
+                    <i class="fas fa-sign-in-alt mr-2"></i> Access My Portal
+                </button>
             </div>
         </div>
     </div>
 
     <div id="main-portal" class="hidden flex min-h-screen">
-        <aside class="w-64 border-r border-slate-200 bg-white flex flex-col p-4 fixed h-full z-10">
-            <div class="mb-8 px-2">
-                <h1 class="text-xl font-bold text-slate-900 leading-tight">Business Administration</h1>
-                <p class="text-xs text-slate-500 font-medium italic">Beni Suef Technological University</p>
+        <aside class="w-72 bg-slate-900 text-white flex flex-col p-6 fixed h-full shadow-2xl">
+            <div class="mb-10 px-2 border-l-4 border-blue-500 pl-4">
+                <h1 class="text-xl font-black tracking-tight">BSUT <span class="text-blue-500">ADMIN</span></h1>
+                <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1">Management System</p>
             </div>
-            <nav class="flex-1">
-                <div onclick="switchTab('dashboard', this)" class="sidebar-item active"><i class="fas fa-th-large"></i> Dashboard</div>
-                <div onclick="switchTab('personal', this)" class="sidebar-item"><i class="far fa-user"></i> Personal Information</div>
+            
+            <nav class="flex-1 space-y-2">
+                <div onclick="switchTab('dashboard', this)" class="sidebar-item active">
+                    <i class="fas fa-columns w-5"></i> Dashboard
+                </div>
+                <div onclick="switchTab('personal', this)" class="sidebar-item">
+                    <i class="fas fa-user-graduate w-5"></i> Profile Info
+                </div>
             </nav>
-            <div class="mt-auto border-t border-slate-100 pt-4">
-                <div id="logout-btn" class="sidebar-item text-red-500 hover:bg-red-50"><i class="fas fa-sign-out-alt"></i> Logout</div>
+
+            <div class="mt-auto pt-6 border-t border-slate-800">
+                <div onclick="location.reload()" class="sidebar-item text-red-400 hover:bg-red-500/10">
+                    <i class="fas fa-power-off w-5"></i> Log Out
+                </div>
             </div>
         </aside>
 
-        <main class="flex-1 ml-64 p-10 bg-slate-50/50">
-            <div id="dynamic-content" class="max-w-6xl mx-auto"></div>
+        <main class="flex-1 ml-72 p-12">
+            <div id="dynamic-content" class="max-w-5xl mx-auto">
+                </div>
         </main>
     </div>
 
@@ -82,6 +103,7 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js";
         import { getDatabase, ref, get, child } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-database.js";
 
+        // بيانات Firebase الخاصة بك من الصورة
         const firebaseConfig = {
             apiKey: "AIzaSyBwg2LRk5wbTMuYNoqoP3Pd5zlOvgXBEIY",
             authDomain: "btu-portal.firebaseapp.com",
@@ -94,72 +116,84 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
-        let currentStudent = null;
+        let studentInfo = null;
 
         // وظيفة تسجيل الدخول
-        async function loginStudent() {
-            const name = document.getElementById('std-name').value.trim();
-            const id = document.getElementById('std-id').value.trim();
+        window.loginStudent = async function() {
+            const nameInp = document.getElementById('std-name').value.trim();
+            const idInp = document.getElementById('std-id').value.trim();
             
-            if(!name || !id) return alert("Please fill all fields");
+            if(!nameInp || !idInp) return alert("Please fill all fields");
 
             const dbRef = ref(db);
             try {
                 const snapshot = await get(child(dbRef, 'students'));
                 if (snapshot.exists()) {
-                    const students = snapshot.val();
-                    const student = Object.values(students).find(s => 
-                        s.name.trim().toLowerCase() === name.toLowerCase() && String(s.id) === id
+                    const data = snapshot.val();
+                    // البحث في السحابة
+                    const student = Object.values(data).find(s => 
+                        s.name.toLowerCase() === nameInp.toLowerCase() && String(s.id) === idInp
                     );
 
                     if (student) {
-                        currentStudent = {
-                            ...student,
-                            initials: student.name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2)
-                        };
+                        studentInfo = student;
                         document.getElementById('login-page').classList.add('hidden');
                         document.getElementById('main-portal').classList.remove('hidden');
-                        window.switchTab('dashboard', document.querySelector('.sidebar-item'));
+                        switchTab('dashboard', document.querySelector('.sidebar-item'));
                     } else {
-                        alert("Invalid Name or ID. Please check the data uploaded by Admin.");
+                        alert("Invalid Login. Not found in Cloud Database.");
                     }
                 } else {
-                    alert("No data found in the cloud. Admin must upload the Excel sheet first.");
+                    alert("No data available. Admin must upload students first.");
                 }
-            } catch (e) {
-                console.error(e);
-                alert("Connection Error. Check your internet.");
+            } catch (err) {
+                alert("Connection Error. Check internet.");
             }
-        }
+        };
 
-        // ربط الأزرار
-        document.getElementById('login-btn').onclick = loginStudent;
-        document.getElementById('logout-btn').onclick = () => location.reload();
-
-        // جعل دالة التبديل متاحة عالمياً
-        window.switchTab = function(tab, element) {
-            document.querySelectorAll('.sidebar-item').forEach(item => item.classList.remove('active'));
-            element.classList.add('active');
-            const content = document.getElementById('dynamic-content');
+        // وظيفة تبديل الصفحات
+        window.switchTab = function(tab, el) {
+            document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+            el.classList.add('active');
+            const container = document.getElementById('dynamic-content');
 
             if (tab === 'dashboard') {
-                content.innerHTML = `
-                    <div class="mb-8"><h1 class="text-3xl font-bold text-slate-900">Dashboard</h1><p class="text-slate-500 mt-1 font-medium">Welcome back, ${currentStudent.name}</p></div>
-                    <div class="grid grid-cols-4 gap-4 mb-8">
-                        <div class="card"><p class="stat-label">Cumulative GPA</p><p class="text-4xl font-bold text-blue-600 mt-2">${currentStudent.gpa || '0.00'}</p></div>
-                        <div class="card"><p class="stat-label">Department</p><p class="text-lg font-bold text-slate-800 mt-2">${currentStudent.dept}</p></div>
+                container.innerHTML = `
+                    <div class="mb-10">
+                        <h1 class="text-4xl font-black text-slate-900">Welcome, ${studentInfo.name.split(' ')[0]}! 👋</h1>
+                        <p class="text-slate-500 mt-2 font-medium italic">Academic Year 2025/2026</p>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="card bg-gradient-to-br from-blue-600 to-blue-700 text-white border-none">
+                            <p class="text-xs font-bold uppercase opacity-80">Cumulative GPA</p>
+                            <h2 class="text-5xl font-black mt-4">${studentInfo.gpa || '0.00'}</h2>
+                        </div>
+                        <div class="card">
+                            <p class="text-xs font-bold text-slate-400 uppercase">Department</p>
+                            <h2 class="text-xl font-bold text-slate-800 mt-2">${studentInfo.dept}</h2>
+                        </div>
+                        <div class="card">
+                            <p class="text-xs font-bold text-slate-400 uppercase">Student ID</p>
+                            <h2 class="text-xl font-bold text-slate-800 mt-2">#${studentInfo.id}</h2>
+                        </div>
                     </div>`;
             } else if (tab === 'personal') {
-                content.innerHTML = `
-                    <div class="mb-8"><h1 class="text-3xl font-bold text-slate-900 italic">Personal Information</h1></div>
-                    <div class="card bg-white p-8">
-                        <div class="flex items-center gap-6 mb-8">
-                            <div class="w-24 h-24 rounded-full bg-blue-600 text-white flex items-center justify-center text-3xl font-bold">${currentStudent.initials}</div>
-                            <div><h2 class="text-2xl font-bold">${currentStudent.name}</h2><p class="text-slate-500">${currentStudent.id}</p></div>
+                container.innerHTML = `
+                    <div class="mb-10"><h1 class="text-3xl font-black text-slate-900">Profile Information</h1></div>
+                    <div class="card p-10 bg-white">
+                        <div class="flex items-center gap-8 mb-10 pb-10 border-b border-slate-100">
+                            <div class="w-24 h-24 rounded-2xl bg-blue-100 text-blue-600 flex items-center justify-center text-4xl font-black shadow-inner">
+                                ${studentInfo.name[0]}
+                            </div>
+                            <div>
+                                <h2 class="text-3xl font-bold text-slate-900">${studentInfo.name}</h2>
+                                <p class="text-blue-500 font-bold mt-1">${studentInfo.dept} Department</p>
+                            </div>
                         </div>
-                        <div class="grid grid-cols-2 gap-8">
-                            <div><p class="text-xs font-bold text-slate-400 uppercase">Phone</p><p class="font-medium">${currentStudent.phone || 'N/A'}</p></div>
-                            <div><p class="text-xs font-bold text-slate-400 uppercase">Level</p><p class="font-medium">${currentStudent.level || 'N/A'}</p></div>
+                        <div class="grid grid-cols-2 gap-y-8">
+                            <div><p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Phone Number</p><p class="text-lg font-semibold">${studentInfo.phone || 'N/A'}</p></div>
+                            <div><p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Academic Level</p><p class="text-lg font-semibold">${studentInfo.level || 'Year 1'}</p></div>
+                            <div><p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Registration Status</p><span class="inline-block mt-1 bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-bold">Active</span></div>
                         </div>
                     </div>`;
             }
