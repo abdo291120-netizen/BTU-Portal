@@ -1,55 +1,48 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ar">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BSUT - Admin Portal</title>
+    <title>BTU Admin - Cloud Manager</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body { background-color: #0f172a; color: white; font-family: 'Inter', sans-serif; }
+    </style>
 </head>
-<body class="bg-[#111827] min-h-screen p-8 text-white">
+<body class="p-8">
+    <div class="max-w-5xl mx-auto">
+        <div class="flex justify-between items-center mb-10 border-b border-slate-700 pb-6">
+            <h1 class="text-3xl font-black italic text-blue-500">BTU ADMIN <span class="text-white">PORTAL</span></h1>
+            <div id="status" class="px-4 py-2 rounded-full bg-red-500/10 text-red-500 border border-red-500/20 text-xs font-bold">Disconnected</div>
+        </div>
 
-    <div class="max-w-6xl mx-auto">
-        <div class="flex justify-between items-center mb-8 border-b border-gray-700 pb-6">
-            <div>
-                <h1 class="text-4xl font-bold text-white">BTU Admin</h1>
-                <p class="text-blue-400 font-medium">Cloud Database Manager</p>
-            </div>
-            <div id="connection-status" class="bg-red-500/20 text-red-400 px-4 py-2 rounded-full text-xs font-bold border border-red-500/50">
-                Disconnected
+        <div class="bg-slate-800 rounded-2xl p-12 border border-slate-700 text-center mb-8 shadow-2xl">
+            <input type="file" id="upload" class="hidden" accept=".xlsx, .xls">
+            <div onclick="document.getElementById('upload').click()" class="cursor-pointer border-2 border-dashed border-slate-600 rounded-xl p-10 hover:border-blue-500 transition-all">
+                <i class="fas fa-file-csv text-5xl text-blue-400 mb-4"></i>
+                <h2 class="text-xl font-bold">ارفع ملف الطلاب (Excel)</h2>
+                <p class="text-slate-400 mt-2 text-sm">تأكد أن الملف يحتوي على أعمدة: Name, University ID</p>
             </div>
         </div>
 
-        <div class="bg-gray-800 rounded-2xl p-10 mb-8 border border-gray-700 text-center shadow-2xl">
-            <input type="file" id="excel-input" class="hidden" accept=".xlsx, .xls">
-            <div onclick="document.getElementById('excel-input').click()" class="border-2 border-dashed border-gray-600 rounded-xl p-16 hover:border-blue-500 transition-all cursor-pointer bg-gray-900/50">
-                <i class="fas fa-cloud-upload-alt text-6xl text-blue-500 mb-6"></i>
-                <h3 class="text-2xl font-bold mb-2">Upload Student Records</h3>
-                <p class="text-gray-400 mb-6">Click to select your Excel file (.xlsx)</p>
-                <button class="bg-blue-600 hover:bg-blue-700 text-white px-10 py-3 rounded-lg font-bold transition-all">Select File</button>
+        <div class="bg-slate-800 rounded-xl border border-slate-700 overflow-hidden">
+            <div class="p-4 bg-slate-900/50 font-bold border-b border-slate-700 flex justify-between">
+                <span>معاينة البيانات السحابية</span>
+                <span id="count" class="text-blue-400">0 طالب</span>
             </div>
-        </div>
-
-        <div class="bg-gray-800 rounded-2xl border border-gray-700 overflow-hidden shadow-2xl">
-            <div class="p-6 border-b border-gray-700 flex justify-between items-center bg-gray-900/50">
-                <h3 class="font-bold text-xl">Cloud Preview</h3>
-                <span id="record-count" class="bg-blue-600 px-3 py-1 rounded-full text-xs">0 Students Found</span>
-            </div>
-            <div class="overflow-x-auto">
-                <table class="w-full text-left">
-                    <thead class="bg-gray-900 text-gray-400 text-xs uppercase">
-                        <tr>
-                            <th class="p-5">Student Name</th>
-                            <th class="p-5">University ID</th>
-                            <th class="p-5">Department</th>
-                            <th class="p-5">Status</th>
-                        </tr>
-                    </thead>
-                    <tbody id="student-table-body" class="divide-y divide-gray-700">
-                        </tbody>
-                </table>
-            </div>
+            <table class="w-full text-right" dir="rtl">
+                <thead class="text-xs text-slate-500 uppercase bg-slate-900">
+                    <tr>
+                        <th class="p-4">الاسم</th>
+                        <th class="p-4">الكود الجامعي</th>
+                        <th class="p-4">السنة</th>
+                        <th class="p-4">الحالة</th>
+                    </tr>
+                </thead>
+                <tbody id="table-body" class="divide-y divide-slate-700"></tbody>
+            </table>
         </div>
     </div>
 
@@ -70,57 +63,47 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        // تحديث الحالة عند الاتصال
-        const statusDiv = document.getElementById('connection-status');
-        onValue(ref(db, '.info/connected'), (snap) => {
-            if (snap.val() === true) {
-                statusDiv.innerText = "Cloud Connected";
-                statusDiv.className = "bg-green-500/20 text-green-400 px-4 py-2 rounded-full text-xs font-bold border border-green-500/50";
-            }
+        onValue(ref(db, '.info/connected'), (s) => {
+            const st = document.getElementById('status');
+            if(s.val()){ st.innerText="Cloud Online"; st.className="px-4 py-2 rounded-full bg-green-500/10 text-green-500 border border-green-500/20 text-xs font-bold"; }
         });
 
-        // قراءة الملف ورفعه
-        document.getElementById('excel-input').addEventListener('change', function(e) {
-            const file = e.target.files[0];
+        document.getElementById('upload').addEventListener('change', (e) => {
             const reader = new FileReader();
-            reader.onload = (event) => {
-                const data = new Uint8Array(event.target.result);
-                const workbook = XLSX.read(data, { type: 'array' });
-                const sheet = workbook.Sheets[workbook.SheetNames[0]];
-                const students = XLSX.utils.sheet_to_json(sheet);
+            reader.onload = (f) => {
+                const data = new Uint8Array(f.target.result);
+                const wb = XLSX.read(data, {type:'array'});
+                const list = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
                 
-                const cloudData = {};
-                students.forEach(s => {
-                    const id = String(s.ID || s.id);
-                    cloudData[id] = {
-                        name: s.Name || s.name,
+                const cloud = {};
+                list.forEach(s => {
+                    const id = String(s['University ID']).trim();
+                    cloud[id] = {
+                        name: s['Name'],
                         id: id,
-                        dept: s.Department || s.dept || "Marketing",
-                        gpa: s.GPA || s.gpa || "0.00"
+                        dept: s['Department'] || 'Marketing',
+                        year: s['Year'] || 'N/A',
+                        phone: s['Phone'] || 'N/A'
                     };
                 });
 
-                set(ref(db, 'students'), cloudData)
-                    .then(() => alert("تم الحفظ في السحابة بنجاح!"))
-                    .catch(() => alert("خطأ في الحفظ، تأكد من إعدادات Firebase"));
+                set(ref(db, 'students'), cloud).then(() => alert("تم الرفع للسحابة بنجاح!"));
             };
-            reader.readAsArrayBuffer(file);
+            reader.readAsArrayBuffer(e.target.files[0]);
         });
 
-        // عرض البيانات من السحابة مباشرة (عشان ما تتمسحش في الريفرش)
-        onValue(ref(db, 'students'), (snapshot) => {
-            const data = snapshot.val();
-            const tbody = document.getElementById('student-table-body');
+        onValue(ref(db, 'students'), (snap) => {
+            const tbody = document.getElementById('table-body');
             tbody.innerHTML = '';
-            if(data) {
-                const list = Object.values(data);
-                document.getElementById('record-count').innerText = `${list.length} Students Online`;
-                list.forEach(s => {
-                    tbody.innerHTML += `<tr class="hover:bg-gray-700/50 transition-all">
-                        <td class="p-5 font-bold">${s.name}</td>
-                        <td class="p-5 text-gray-400">${s.id}</td>
-                        <td class="p-5 text-blue-400">${s.dept}</td>
-                        <td class="p-5"><span class="bg-green-500/20 text-green-400 px-2 py-1 rounded text-[10px]">ONLINE</span></td>
+            if(snap.exists()){
+                const data = Object.values(snap.val());
+                document.getElementById('count').innerText = data.length + " طالب";
+                data.forEach(s => {
+                    tbody.innerHTML += `<tr class="hover:bg-slate-700/30">
+                        <td class="p-4 font-bold">${s.name}</td>
+                        <td class="p-4 text-slate-400">${s.id}</td>
+                        <td class="p-4 text-blue-400">${s.year}</td>
+                        <td class="p-4"><span class="text-green-500 text-[10px] font-bold">ONLINE</span></td>
                     </tr>`;
                 });
             }
