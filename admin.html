@@ -3,186 +3,148 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Control - BSUT</title>
+    <title>Admin - BTU Portal</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-        body { font-family: 'Inter', sans-serif; background-color: #f1f5f9; color: #0f172a; }
-        .admin-sidebar-item { transition: all 0.2s; cursor: pointer; display: flex; align-items: center; gap: 12px; padding: 14px 18px; border-radius: 10px; color: #94a3b8; font-weight: 500; }
-        .admin-sidebar-item:hover { background-color: #1e293b; color: white; }
-        .admin-sidebar-item.active { background-color: #2563eb; color: white; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2); }
-        .stat-card { background: white; border-radius: 16px; padding: 24px; border: 1px solid #e2e8f0; }
-        #lock-screen { position: fixed; inset: 0; background: #0f172a; z-index: 100; display: flex; align-items: center; justify-content: center; flex-direction: column; color: white; }
-        #add-student-modal { display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.8); z-index: 50; align-items: center; justify-content: center; }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
+        .sidebar-item { transition: 0.2s; cursor: pointer; display: flex; align-items: center; gap: 12px; padding: 12px 18px; border-radius: 12px; color: #94a3b8; }
+        .sidebar-item.active { background: #2563eb; color: white; }
+        #lock-screen { position: fixed; inset: 0; background: #0f172a; z-index: 100; display: flex; align-items: center; justify-content: center; color: white; }
     </style>
 </head>
 <body class="flex min-h-screen">
 
-    <div id="add-student-modal">
-        <div class="bg-white rounded-2xl p-8 w-full max-w-md shadow-2xl">
-            <h2 class="text-2xl font-bold mb-6 italic">Add New Student</h2>
-            <div class="space-y-4">
-                <input type="text" id="new-name" placeholder="Full Name" class="w-full p-3 border rounded-xl outline-none focus:ring-2 focus:ring-blue-500">
-                <input type="text" id="new-id" placeholder="Student ID" class="w-full p-3 border rounded-xl outline-none focus:ring-2 focus:ring-blue-500">
-                <input type="text" id="new-dept" placeholder="Department" class="w-full p-3 border rounded-xl outline-none focus:ring-2 focus:ring-blue-500">
-                <div class="flex gap-3 mt-6">
-                    <button onclick="closeModal()" class="flex-1 py-3 font-bold text-slate-500 hover:bg-slate-100 rounded-xl">Cancel</button>
-                    <button onclick="saveStudent()" class="flex-1 py-3 font-bold bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-all">Save Student</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <div id="lock-screen">
-        <div class="w-full max-w-md p-8 text-center">
-            <div class="w-20 h-20 bg-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-2xl"><i class="fas fa-lock text-3xl"></i></div>
-            <h2 class="text-2xl font-bold mb-2 italic">Admin Verification</h2>
-            <input type="password" id="admin-pass" placeholder="Enter Password" class="w-full p-4 rounded-xl bg-slate-800 border border-slate-700 text-white text-center mb-4 font-bold">
-            <button onclick="verifyAccess()" class="w-full bg-blue-600 hover:bg-blue-500 p-4 rounded-xl font-bold transition-all">Verify Access</button>
+        <div class="w-full max-w-sm p-6 text-center">
+            <h2 class="text-2xl font-bold mb-4">Admin Access</h2>
+            <input type="password" id="admin-pass" placeholder="Enter Password" class="w-full p-3 rounded-lg bg-slate-800 border border-slate-700 text-center mb-4">
+            <button onclick="verifyAccess()" class="w-full bg-blue-600 p-3 rounded-lg font-bold">Verify</button>
         </div>
     </div>
 
-    <aside class="w-72 bg-[#0f172a] text-white flex flex-col p-6 fixed h-full z-20">
-        <div class="mb-10 px-2">
-            <div class="flex items-center gap-3 mb-2">
-                <div class="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center"><i class="fas fa-user-shield text-xl"></i></div>
-                <h1 class="text-xl font-bold tracking-tight">Admin Central</h1>
-            </div>
+    <aside class="w-64 bg-[#0f172a] text-white flex flex-col p-4 fixed h-full shadow-xl">
+        <div class="flex items-center gap-2 mb-10 p-2 font-bold text-xl italic text-blue-400">
+            <i class="fas fa-university"></i> BTU ADMIN
         </div>
         <nav class="space-y-2">
-            <div onclick="switchAdminTab('overview', this)" class="admin-sidebar-item active"><i class="fas fa-chart-pie"></i> Overview</div>
-            <div onclick="switchAdminTab('students', this)" class="admin-sidebar-item"><i class="fas fa-users"></i> Manage Students</div>
-            <div onclick="switchAdminTab('upload', this)" class="admin-sidebar-item"><i class="fas fa-file-import"></i> Bulk Import</div>
+            <div onclick="switchTab('overview', this)" class="sidebar-item active"><i class="fas fa-home"></i> Overview</div>
+            <div onclick="switchTab('students', this)" class="sidebar-item"><i class="fas fa-user-graduate"></i> Students List</div>
+            <div onclick="switchTab('upload', this)" class="sidebar-item"><i class="fas fa-upload"></i> Import Excel</div>
         </nav>
     </aside>
 
-    <main class="flex-1 ml-72 p-10">
-        <div id="admin-dynamic-content" class="max-w-7xl mx-auto"></div>
+    <main class="flex-1 ml-64 p-8">
+        <div id="content-area"></div>
     </main>
 
     <script>
         function verifyAccess() {
             if (document.getElementById('admin-pass').value === "29112006") {
                 document.getElementById('lock-screen').style.display = 'none';
-            } else { alert("Incorrect Password!"); }
-        }
-
-        // قاعدة البيانات الأساسية
-        let studentDb = JSON.parse(localStorage.getItem('BTU_DATABASE')) || [
-            { id: "202509042", name: "Abdelrahman Sherif Ahmed", dept: "Marketing Technology", gpa: "0.00", military: "0" }
-        ];
-
-        function saveToLocal() {
-            localStorage.setItem('BTU_DATABASE', JSON.stringify(studentDb));
-        }
-
-        function openModal() { document.getElementById('add-student-modal').style.display = 'flex'; }
-        function closeModal() { document.getElementById('add-student-modal').style.display = 'none'; }
-
-        function saveStudent() {
-            const name = document.getElementById('new-name').value;
-            const id = document.getElementById('new-id').value;
-            const dept = document.getElementById('new-dept').value;
-            if(name && id) {
-                studentDb.push({ id, name, dept, gpa: "0.00", military: "0" });
-                saveToLocal(); closeModal();
-                switchAdminTab('students', document.querySelectorAll('.admin-sidebar-item')[1]);
             }
         }
 
-        // --- وظيفة قراءة ملف الإكسيل الحقيقية ---
-        function handleExcelUpload(event) {
-            const file = event.target.files[0];
+        // قاعدة البيانات (دعم الحقول الجديدة)
+        let studentDb = JSON.parse(localStorage.getItem('BTU_PORTAL_DB')) || [];
+
+        function saveDb() {
+            localStorage.setItem('BTU_PORTAL_DB', JSON.stringify(studentDb));
+            if(document.getElementById('student-table')) renderStudents();
+        }
+
+        // حذف طالب
+        function deleteStudent(index) {
+            if(confirm("Are you sure you want to delete this student?")) {
+                studentDb.splice(index, 1);
+                saveDb();
+                switchTab('students', document.querySelectorAll('.sidebar-item')[1]);
+            }
+        }
+
+        // رفع الإكسيل ومعالجة البيانات
+        function handleUpload(e) {
             const reader = new FileReader();
+            reader.onload = (event) => {
+                const workbook = XLSX.read(new Uint8Array(event.target.result), {type: 'array'});
+                const sheet = workbook.Sheets[workbook.SheetNames[0]];
+                const data = XLSX.utils.sheet_to_json(sheet);
 
-            reader.onload = function(e) {
-                const data = new Uint8Array(e.target.result);
-                const workbook = XLSX.read(data, { type: 'array' });
-                
-                // قراءة أول ورقة في ملف الإكسيل
-                const firstSheetName = workbook.SheetNames[0];
-                const worksheet = workbook.Sheets[firstSheetName];
-                
-                // تحويل البيانات إلى JSON
-                const jsonData = XLSX.utils.sheet_to_json(worksheet);
-
-                if (jsonData.length > 0) {
-                    // دمج البيانات الجديدة مع القديمة (أو استبدالها حسب رغبتك)
-                    jsonData.forEach(row => {
-                        // التأكد من وجود البيانات الأساسية قبل الإضافة
-                        if(row.ID || row.id) {
-                            studentDb.push({
-                                id: String(row.ID || row.id || ""),
-                                name: String(row.Name || row.name || "Unknown"),
-                                dept: String(row.Dept || row.dept || "General"),
-                                gpa: String(row.GPA || row.gpa || "0.00"),
-                                military: String(row.Military || row.military || "0")
-                            });
-                        }
+                data.forEach(row => {
+                    studentDb.push({
+                        name: row.Name || row.name || "N/A",
+                        id: String(row.ID || row.id || ""),
+                        phone: row.Phone || row.phone || "N/A",
+                        level: row.Level || row.level || "N/A",
+                        dept: row.Dept || row.dept || "N/A",
+                        parent: row.Parent || row.parent || "N/A"
                     });
-
-                    saveToLocal();
-                    alert(`Successfully imported ${jsonData.length} students from Excel!`);
-                    switchAdminTab('students', document.querySelectorAll('.admin-sidebar-item')[1]);
-                }
+                });
+                saveDb();
+                alert(`Imported ${data.length} students successfully!`);
             };
-            reader.readAsArrayBuffer(file);
+            reader.readAsArrayBuffer(e.target.files[0]);
         }
 
-        function switchAdminTab(tab, element) {
-            document.querySelectorAll('.admin-sidebar-item').forEach(item => item.classList.remove('active'));
-            element.classList.add('active');
-            const content = document.getElementById('admin-dynamic-content');
+        function switchTab(tab, el) {
+            document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+            el.classList.add('active');
+            const area = document.getElementById('content-area');
 
-            if (tab === 'overview') {
-                content.innerHTML = `
-                    <h1 class="text-4xl font-black mb-8 italic">Dashboard Overview</h1>
-                    <div class="grid grid-cols-4 gap-6 mb-10">
-                        <div class="stat-card"><p class="text-slate-500 text-xs font-bold uppercase">Total Students</p><p class="text-3xl font-black mt-1">${studentDb.length}</p></div>
-                    </div>`;
-            } else if (tab === 'students') {
-                content.innerHTML = `
-                    <div class="flex justify-between items-center mb-8">
-                        <h1 class="text-4xl font-black italic">Student Directory</h1>
-                        <button onclick="openModal()" class="bg-blue-600 text-white px-6 py-3 rounded-xl font-bold shadow-lg">Add Student</button>
-                    </div>
-                    <div class="bg-white rounded-2xl border overflow-hidden">
-                        <table class="w-full text-left">
-                            <thead class="bg-slate-50 border-b">
-                                <tr>
-                                    <th class="p-5 text-[11px] font-black text-slate-400 uppercase">Name</th>
-                                    <th class="p-5 text-[11px] font-black text-slate-400 uppercase">ID</th>
-                                    <th class="p-5 text-[11px] font-black text-slate-400 uppercase">GPA</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                ${studentDb.map(s => `
-                                <tr class="border-b border-slate-50">
-                                    <td class="p-5 font-bold italic">${s.name}</td>
-                                    <td class="p-5 font-medium text-slate-500">${s.id}</td>
-                                    <td class="p-5 font-bold text-blue-600">${s.gpa}</td>
+            if(tab === 'overview') {
+                area.innerHTML = `<h1 class="text-3xl font-bold mb-6">Overview</h1>
+                <div class="bg-white p-6 rounded-2xl shadow-sm border w-64 text-center">
+                    <p class="text-slate-400 font-bold uppercase text-xs">Total Students</p>
+                    <p class="text-4xl font-black text-blue-600 mt-2">${studentDb.length}</p>
+                </div>`;
+            } 
+            else if(tab === 'students') {
+                area.innerHTML = `<div class="flex justify-between mb-6">
+                    <h1 class="text-3xl font-bold">Students Directory</h1>
+                </div>
+                <div class="bg-white rounded-xl shadow-sm border overflow-x-auto">
+                    <table class="w-full text-left" id="student-table">
+                        <thead class="bg-slate-50 border-b">
+                            <tr>
+                                <th class="p-4 text-xs font-bold text-slate-400 uppercase">Student Name</th>
+                                <th class="p-4 text-xs font-bold text-slate-400 uppercase">ID</th>
+                                <th class="p-4 text-xs font-bold text-slate-400 uppercase">Level/Dept</th>
+                                <th class="p-4 text-xs font-bold text-slate-400 uppercase">Phones</th>
+                                <th class="p-4 text-xs font-bold text-slate-400 uppercase text-center">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${studentDb.map((s, index) => `
+                            <tr class="border-b hover:bg-slate-50">
+                                <td class="p-4 font-bold text-slate-700">${s.name}</td>
+                                <td class="p-4 font-medium text-slate-500">${s.id}</td>
+                                <td class="p-4 text-sm text-slate-500">${s.level} - ${s.dept}</td>
+                                <td class="p-4 text-xs text-slate-400">S: ${s.phone}<br>P: ${s.parent}</td>
+                                <td class="p-4 text-center">
+                                    <button onclick="deleteStudent(${index})" class="text-red-500 hover:bg-red-50 p-2 rounded-lg">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </td>
                                 </tr>`).join('')}
-                            </tbody>
-                        </table>
-                    </div>`;
-            } else if (tab === 'upload') {
-                content.innerHTML = `
-                    <div class="max-w-3xl mx-auto text-center">
-                        <h1 class="text-4xl font-black mb-4 italic">Bulk Data Import</h1>
-                        <p class="text-slate-500 mb-8 font-medium">Upload Excel (.xlsx) file to import all students at once.</p>
-                        <div class="bg-white p-16 rounded-3xl border-4 border-dashed border-slate-200">
-                            <i class="fas fa-file-excel text-5xl text-green-600 mb-6"></i>
-                            <h3 class="text-xl font-bold mb-4">Select Spreadsheet File</h3>
-                            <input type="file" id="excel-input" class="hidden" accept=".xlsx, .xls" onchange="handleExcelUpload(event)">
-                            <button onclick="document.getElementById('excel-input').click()" class="bg-green-600 text-white px-12 py-4 rounded-xl font-bold hover:bg-green-700 transition-all">Choose Excel File</button>
-                        </div>
-                    </div>`;
+                        </tbody>
+                    </table>
+                </div>`;
+            }
+            else if(tab === 'upload') {
+                area.innerHTML = `<div class="max-w-xl mx-auto text-center mt-20">
+                    <div class="bg-white p-10 rounded-3xl border-2 border-dashed border-slate-300">
+                        <i class="fas fa-file-excel text-5xl text-green-500 mb-6"></i>
+                        <h2 class="text-xl font-bold mb-2">Upload Student Spreadsheet</h2>
+                        <p class="text-slate-400 mb-6 text-sm">Upload .xlsx file with Name, ID, Phone, Level, Dept, Parent columns.</p>
+                        <input type="file" id="fileIn" class="hidden" accept=".xlsx" onchange="handleUpload(event)">
+                        <button onclick="document.getElementById('fileIn').click()" class="bg-green-600 text-white px-8 py-3 rounded-xl font-bold shadow-lg shadow-green-200">Select File</button>
+                    </div>
+                </div>`;
             }
         }
 
-        window.onload = () => switchAdminTab('overview', document.querySelector('.admin-sidebar-item'));
+        window.onload = () => switchTab('overview', document.querySelector('.sidebar-item'));
     </script>
 </body>
 </html>
