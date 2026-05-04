@@ -1,48 +1,65 @@
 <!DOCTYPE html>
-<html lang="ar">
+<html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BTU Admin - Cloud Manager</title>
+    <title>BTU - Admin Control</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        body { background-color: #0f172a; color: white; font-family: 'Inter', sans-serif; }
+        body { background-color: #0f172a; font-family: 'Inter', sans-serif; color: white; }
+        .hidden { display: none !important; }
     </style>
 </head>
-<body class="p-8">
-    <div class="max-w-5xl mx-auto">
-        <div class="flex justify-between items-center mb-10 border-b border-slate-700 pb-6">
-            <h1 class="text-3xl font-black italic text-blue-500">BTU ADMIN <span class="text-white">PORTAL</span></h1>
-            <div id="status" class="px-4 py-2 rounded-full bg-red-500/10 text-red-500 border border-red-500/20 text-xs font-bold">Disconnected</div>
+<body class="p-4 md:p-8">
+
+    <div id="admin-lock" class="min-h-screen flex items-center justify-center">
+        <div class="bg-slate-800 p-8 rounded-3xl border border-slate-700 shadow-2xl w-full max-w-md text-center">
+            <i class="fas fa-user-shield text-5xl text-blue-500 mb-6"></i>
+            <h2 class="text-2xl font-bold mb-6">لوحة تحكم المسؤول</h2>
+            <input type="password" id="admin-pass" placeholder="أدخل كلمة المرور" class="w-full p-4 rounded-xl bg-slate-900 border border-slate-700 mb-4 outline-none focus:ring-2 focus:ring-blue-500 text-center">
+            <button onclick="checkPass()" class="w-full bg-blue-600 py-4 rounded-xl font-bold hover:bg-blue-700 transition-all">دخول</button>
+        </div>
+    </div>
+
+    <div id="admin-content" class="hidden max-w-6xl mx-auto">
+        <div class="flex justify-between items-center mb-10 bg-slate-800 p-6 rounded-2xl border border-slate-700">
+            <div>
+                <h1 class="text-3xl font-black italic text-blue-500">BTU <span class="text-white">ADMIN</span></h1>
+                <p class="text-slate-400 text-xs mt-1 uppercase tracking-widest">Cloud Database System</p>
+            </div>
+            <div id="cloud-status" class="bg-red-500/10 text-red-500 border border-red-500/20 px-4 py-2 rounded-full text-xs font-bold uppercase">OFFLINE</div>
         </div>
 
-        <div class="bg-slate-800 rounded-2xl p-12 border border-slate-700 text-center mb-8 shadow-2xl">
-            <input type="file" id="upload" class="hidden" accept=".xlsx, .xls">
-            <div onclick="document.getElementById('upload').click()" class="cursor-pointer border-2 border-dashed border-slate-600 rounded-xl p-10 hover:border-blue-500 transition-all">
-                <i class="fas fa-file-csv text-5xl text-blue-400 mb-4"></i>
-                <h2 class="text-xl font-bold">ارفع ملف الطلاب (Excel)</h2>
-                <p class="text-slate-400 mt-2 text-sm">تأكد أن الملف يحتوي على أعمدة: Name, University ID</p>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div class="md:col-span-1 bg-slate-800 p-8 rounded-3xl border border-slate-700 text-center">
+                <input type="file" id="excel-file" class="hidden" accept=".xlsx, .xls, .csv">
+                <div onclick="document.getElementById('excel-file').click()" class="cursor-pointer border-2 border-dashed border-slate-600 rounded-2xl p-8 hover:border-blue-500 transition-all bg-slate-900/50">
+                    <i class="fas fa-cloud-upload-alt text-4xl text-blue-400 mb-4"></i>
+                    <h3 class="font-bold">ارفع ملف الإكسيل</h3>
+                    <p class="text-slate-500 text-xs mt-2">قم باختيار ملف الطلاب الجديد</p>
+                </div>
             </div>
-        </div>
-
-        <div class="bg-slate-800 rounded-xl border border-slate-700 overflow-hidden">
-            <div class="p-4 bg-slate-900/50 font-bold border-b border-slate-700 flex justify-between">
-                <span>معاينة البيانات السحابية</span>
-                <span id="count" class="text-blue-400">0 طالب</span>
+            
+            <div class="md:col-span-2 bg-slate-800 rounded-3xl border border-slate-700 overflow-hidden">
+                <div class="p-5 bg-slate-900/50 flex justify-between items-center border-b border-slate-700">
+                    <span class="font-bold"><i class="fas fa-database ml-2"></i>الطلاب في السحابة</span>
+                    <span id="student-count" class="bg-blue-600 px-3 py-1 rounded-full text-xs font-bold">0</span>
+                </div>
+                <div class="max-h-[400px] overflow-y-auto">
+                    <table class="w-full text-right">
+                        <thead class="sticky top-0 bg-slate-900 text-slate-500 text-[10px] uppercase">
+                            <tr>
+                                <th class="p-4">الاسم</th>
+                                <th class="p-4">الكود الجامعي</th>
+                                <th class="p-4">الحالة</th>
+                            </tr>
+                        </thead>
+                        <tbody id="data-preview" class="divide-y divide-slate-700/50 text-sm"></tbody>
+                    </table>
+                </div>
             </div>
-            <table class="w-full text-right" dir="rtl">
-                <thead class="text-xs text-slate-500 uppercase bg-slate-900">
-                    <tr>
-                        <th class="p-4">الاسم</th>
-                        <th class="p-4">الكود الجامعي</th>
-                        <th class="p-4">السنة</th>
-                        <th class="p-4">الحالة</th>
-                    </tr>
-                </thead>
-                <tbody id="table-body" class="divide-y divide-slate-700"></tbody>
-            </table>
         </div>
     </div>
 
@@ -63,51 +80,70 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        onValue(ref(db, '.info/connected'), (s) => {
-            const st = document.getElementById('status');
-            if(s.val()){ st.innerText="Cloud Online"; st.className="px-4 py-2 rounded-full bg-green-500/10 text-green-500 border border-green-500/20 text-xs font-bold"; }
+        // التحقق من كلمة السر
+        window.checkPass = function() {
+            const pass = document.getElementById('admin-pass').value;
+            if(pass === "123456") { // يمكنك تغيير كلمة السر هنا
+                document.getElementById('admin-lock').classList.add('hidden');
+                document.getElementById('admin-content').classList.remove('hidden');
+                loadCloudData();
+            } else { alert("كلمة السر خطأ!"); }
+        };
+
+        // تحديث حالة الاتصال بالسحابة
+        onValue(ref(db, '.info/connected'), (snap) => {
+            const status = document.getElementById('cloud-status');
+            if(snap.val()) {
+                status.innerText = "Cloud Online";
+                status.className = "bg-green-500/10 text-green-500 border border-green-500/20 px-4 py-2 rounded-full text-xs font-bold uppercase";
+            }
         });
 
-        document.getElementById('upload').addEventListener('change', (e) => {
+        // قراءة الملف ورفعه للسحابة
+        document.getElementById('excel-file').addEventListener('change', (e) => {
             const reader = new FileReader();
             reader.onload = (f) => {
                 const data = new Uint8Array(f.target.result);
-                const wb = XLSX.read(data, {type:'array'});
-                const list = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
+                const workbook = XLSX.read(data, {type: 'array'});
+                const list = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
                 
-                const cloud = {};
+                const cloudData = {};
                 list.forEach(s => {
                     const id = String(s['University ID']).trim();
-                    cloud[id] = {
+                    cloudData[id] = {
                         name: s['Name'],
                         id: id,
                         dept: s['Department'] || 'Marketing',
-                        year: s['Year'] || 'N/A',
-                        phone: s['Phone'] || 'N/A'
+                        year: s['Year'] || 'N/A'
                     };
                 });
 
-                set(ref(db, 'students'), cloud).then(() => alert("تم الرفع للسحابة بنجاح!"));
+                set(ref(db, 'students'), cloudData)
+                    .then(() => alert("تم الحفظ بنجاح في السحابة!"))
+                    .catch(() => alert("فشل الحفظ! تأكد من إعدادات Firebase"));
             };
             reader.readAsArrayBuffer(e.target.files[0]);
         });
 
-        onValue(ref(db, 'students'), (snap) => {
-            const tbody = document.getElementById('table-body');
-            tbody.innerHTML = '';
-            if(snap.exists()){
-                const data = Object.values(snap.val());
-                document.getElementById('count').innerText = data.length + " طالب";
-                data.forEach(s => {
-                    tbody.innerHTML += `<tr class="hover:bg-slate-700/30">
-                        <td class="p-4 font-bold">${s.name}</td>
-                        <td class="p-4 text-slate-400">${s.id}</td>
-                        <td class="p-4 text-blue-400">${s.year}</td>
-                        <td class="p-4"><span class="text-green-500 text-[10px] font-bold">ONLINE</span></td>
-                    </tr>`;
-                });
-            }
-        });
+        // جلب البيانات من السحابة للعرض (الضمان بأنها لم تتمسح)
+        function loadCloudData() {
+            onValue(ref(db, 'students'), (snap) => {
+                const tbody = document.getElementById('data-preview');
+                const count = document.getElementById('student-count');
+                tbody.innerHTML = '';
+                if(snap.exists()) {
+                    const students = Object.values(snap.val());
+                    count.innerText = students.length;
+                    students.forEach(s => {
+                        tbody.innerHTML += `<tr class="hover:bg-slate-700/30">
+                            <td class="p-4 font-bold text-blue-400">${s.name}</td>
+                            <td class="p-4 text-slate-400">${s.id}</td>
+                            <td class="p-4 text-green-500 text-[10px] font-black uppercase">Stored</td>
+                        </tr>`;
+                    });
+                }
+            });
+        }
     </script>
 </body>
 </html>
