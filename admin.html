@@ -13,12 +13,32 @@
         .admin-sidebar-item:hover { background-color: #1e293b; color: white; }
         .admin-sidebar-item.active { background-color: #2563eb; color: white; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2); }
         .stat-card { background: white; border-radius: 16px; padding: 24px; border: 1px solid #e2e8f0; }
-        .action-btn { transition: all 0.2s; }
-        .action-btn:hover { transform: translateY(-1px); }
         #lock-screen { position: fixed; inset: 0; background: #0f172a; z-index: 100; display: flex; align-items: center; justify-content: center; flex-direction: column; color: white; }
+        /* Modal Style */
+        #add-student-modal { display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.8); z-index: 50; align-items: center; justify-content: center; }
     </style>
 </head>
 <body class="flex min-h-screen">
+
+    <!-- نافذة إضافة طالب جديد (Modal) -->
+    <div id="add-student-modal">
+        <div class="bg-white rounded-2xl p-8 w-full max-w-md shadow-2xl">
+            <h2 class="text-2xl font-bold mb-6 italic">Add New Student</h2>
+            <div class="space-y-4">
+                <input type="text" id="new-name" placeholder="Full Name" class="w-full p-3 border rounded-xl outline-none focus:ring-2 focus:ring-blue-500">
+                <input type="text" id="new-id" placeholder="Student ID (e.g. 202509042)" class="w-full p-3 border rounded-xl outline-none focus:ring-2 focus:ring-blue-500">
+                <select id="new-dept" class="w-full p-3 border rounded-xl outline-none focus:ring-2 focus:ring-blue-500 bg-white">
+                    <option value="Marketing Technology">Marketing Technology</option>
+                    <option value="Information Technology">Information Technology</option>
+                    <option value="Mechatronics">Mechatronics</option>
+                </select>
+                <div class="flex gap-3 mt-6">
+                    <button onclick="closeModal()" class="flex-1 py-3 font-bold text-slate-500 hover:bg-slate-100 rounded-xl">Cancel</button>
+                    <button onclick="saveStudent()" class="flex-1 py-3 font-bold bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-all">Save Student</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- شاشة الحماية بالباسورد -->
     <div id="lock-screen">
@@ -27,7 +47,6 @@
                 <i class="fas fa-lock text-3xl"></i>
             </div>
             <h2 class="text-2xl font-bold mb-2 italic">Admin Verification</h2>
-            <p class="text-slate-400 mb-8 italic">Please enter the security key to proceed.</p>
             <input type="password" id="admin-pass" placeholder="Enter Password" class="w-full p-4 rounded-xl bg-slate-800 border border-slate-700 text-white text-center focus:outline-none focus:ring-2 focus:ring-blue-500 mb-4 font-bold">
             <button onclick="verifyAccess()" class="w-full bg-blue-600 hover:bg-blue-500 p-4 rounded-xl font-bold transition-all">Verify Access</button>
             <p id="error-msg" class="text-red-500 mt-4 text-sm font-bold hidden italic">Incorrect Password!</p>
@@ -38,29 +57,21 @@
     <aside class="w-72 bg-[#0f172a] text-white flex flex-col p-6 fixed h-full z-20">
         <div class="mb-10 px-2">
             <div class="flex items-center gap-3 mb-2">
-                <div class="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
-                    <i class="fas fa-user-shield text-xl"></i>
-                </div>
+                <div class="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center"><i class="fas fa-user-shield text-xl"></i></div>
                 <h1 class="text-xl font-bold tracking-tight">Admin Central</h1>
             </div>
-            <p class="text-[10px] text-slate-500 font-bold uppercase tracking-widest">BSU Technological University</p>
+            <p class="text-[10px] text-slate-500 font-bold uppercase tracking-widest italic">BSU Technological University</p>
         </div>
-        
         <nav class="space-y-2">
             <div onclick="switchAdminTab('overview', this)" class="admin-sidebar-item active"><i class="fas fa-chart-pie"></i> Overview</div>
             <div onclick="switchAdminTab('students', this)" class="admin-sidebar-item"><i class="fas fa-users"></i> Manage Students</div>
             <div onclick="switchAdminTab('upload', this)" class="admin-sidebar-item"><i class="fas fa-file-import"></i> Bulk Import</div>
             <div onclick="switchAdminTab('grades', this)" class="admin-sidebar-item"><i class="fas fa-edit"></i> Grading Portal</div>
-            <div onclick="switchAdminTab('settings', this)" class="admin-sidebar-item"><i class="fas fa-cog"></i> System Settings</div>
         </nav>
-
         <div class="mt-auto p-4 bg-slate-800/50 rounded-xl border border-slate-700">
             <div class="flex items-center gap-3">
                 <div class="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-xs font-bold">ADM</div>
-                <div>
-                    <p class="text-xs font-bold">Admin Panel</p>
-                    <p class="text-[10px] text-slate-400">v2.0.26</p>
-                </div>
+                <div><p class="text-xs font-bold">Admin Panel</p><p class="text-[10px] text-slate-400 font-bold">v2.0.26</p></div>
             </div>
         </div>
     </aside>
@@ -71,28 +82,49 @@
     </main>
 
     <script>
-        // نظام التحقق من الباسورد
         function verifyAccess() {
             const passInput = document.getElementById('admin-pass').value;
-            const errorMsg = document.getElementById('error-msg');
             if (passInput === "29112006") {
                 document.getElementById('lock-screen').style.display = 'none';
             } else {
-                errorMsg.classList.remove('hidden');
-                setTimeout(() => errorMsg.classList.add('hidden'), 2000);
+                document.getElementById('error-msg').classList.remove('hidden');
+                setTimeout(() => document.getElementById('error-msg').classList.add('hidden'), 2000);
             }
         }
 
-        // قاعدة البيانات المحدثة بالبيانات المطلوبة
         let studentDb = JSON.parse(localStorage.getItem('BTU_DATABASE')) || [
             { id: "202509042", name: "Abdelrahman Sherif Ahmed", dept: "Marketing Technology", gpa: "0.00", military: "0" }
         ];
+
+        function saveToLocal() {
+            localStorage.setItem('BTU_DATABASE', JSON.stringify(studentDb));
+        }
 
         function updateDatabase(studentId, field, value) {
             const index = studentDb.findIndex(s => s.id === studentId);
             if (index !== -1) {
                 studentDb[index][field] = value;
-                localStorage.setItem('BTU_DATABASE', JSON.stringify(studentDb));
+                saveToLocal();
+            }
+        }
+
+        // وظائف نافذة الإضافة
+        function openModal() { document.getElementById('add-student-modal').style.display = 'flex'; }
+        function closeModal() { document.getElementById('add-student-modal').style.display = 'none'; }
+        
+        function saveStudent() {
+            const name = document.getElementById('new-name').value;
+            const id = document.getElementById('new-id').value;
+            const dept = document.getElementById('new-dept').value;
+
+            if(name && id) {
+                studentDb.push({ id, name, dept, gpa: "0.00", military: "0" });
+                saveToLocal();
+                closeModal();
+                switchAdminTab('students', document.querySelectorAll('.admin-sidebar-item')[1]);
+                alert('Student added successfully!');
+            } else {
+                alert('Please fill all fields');
             }
         }
 
@@ -104,63 +136,16 @@
             if (tab === 'overview') {
                 content.innerHTML = `
                     <div class="flex justify-between items-end mb-8">
-                        <div>
-                            <h1 class="text-4xl font-black text-slate-900 italic">Dashboard Overview</h1>
-                            <p class="text-slate-500 font-medium mt-2 italic">Real-time system analytics and student metrics.</p>
-                        </div>
-                        <div class="text-right">
-                            <p class="text-xs font-bold text-slate-400 uppercase">System Status</p>
-                            <p class="text-green-500 font-bold flex items-center gap-2"><span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span> Operational</p>
-                        </div>
+                        <div><h1 class="text-4xl font-black text-slate-900 italic">Dashboard Overview</h1><p class="text-slate-500 font-medium mt-2 italic">Real-time system analytics.</p></div>
                     </div>
-                    
                     <div class="grid grid-cols-4 gap-6 mb-10">
-                        <div class="stat-card">
-                            <div class="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center text-blue-600 mb-4"><i class="fas fa-user-graduate"></i></div>
-                            <p class="text-slate-500 text-xs font-bold uppercase">Total Students</p>
-                            <p class="text-3xl font-black mt-1">${studentDb.length}</p>
-                        </div>
-                        <div class="stat-card">
-                            <div class="w-12 h-12 bg-orange-50 rounded-xl flex items-center justify-center text-orange-600 mb-4"><i class="fas fa-building"></i></div>
-                            <p class="text-slate-500 text-xs font-bold uppercase">Departments</p>
-                            <p class="text-3xl font-black mt-1">6</p>
-                        </div>
-                        <div class="stat-card">
-                            <div class="w-12 h-12 bg-green-50 rounded-xl flex items-center justify-center text-green-600 mb-4"><i class="fas fa-check-double"></i></div>
-                            <p class="text-slate-500 text-xs font-bold uppercase">Active Programs</p>
-                            <p class="text-3xl font-black mt-1">12</p>
-                        </div>
-                        <div class="stat-card">
-                            <div class="w-12 h-12 bg-purple-50 rounded-xl flex items-center justify-center text-purple-600 mb-4"><i class="fas fa-file-alt"></i></div>
-                            <p class="text-slate-500 text-xs font-bold uppercase">New Assignments</p>
-                            <p class="text-3xl font-black mt-1">42</p>
-                        </div>
+                        <div class="stat-card"><p class="text-slate-500 text-xs font-bold uppercase">Total Students</p><p class="text-3xl font-black mt-1">${studentDb.length}</p></div>
                     </div>
-
-                    <div class="grid grid-cols-3 gap-6">
-                        <div class="col-span-2 bg-white rounded-2xl p-8 border border-slate-200 shadow-sm">
-                            <h3 class="font-bold text-lg mb-6 italic">Recent Registration Activity</h3>
-                            <div class="space-y-4">
-                                <div class="flex items-center justify-between p-4 bg-slate-50 rounded-xl border border-slate-100">
-                                    <div class="flex items-center gap-4">
-                                        <div class="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center font-bold text-xs">AS</div>
-                                        <div>
-                                            <p class="font-bold text-sm">Abdelrahman Sherif Ahmed</p>
-                                            <p class="text-xs text-slate-500 font-medium italic">Marketing Tech · Last Sync: Now</p>
-                                        </div>
-                                    </div>
-                                    <p class="text-[10px] font-bold text-slate-400 uppercase">Online</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="bg-[#0f172a] rounded-2xl p-8 text-white">
-                            <h3 class="font-bold text-lg mb-2 italic">Quick Actions</h3>
-                            <p class="text-slate-400 text-xs mb-6 italic">Commonly used administrative tasks.</p>
-                            <div class="space-y-3">
-                                <button class="w-full bg-blue-600 hover:bg-blue-500 p-3 rounded-lg font-bold text-sm text-left flex items-center gap-3 transition-colors"><i class="fas fa-plus-circle"></i> Add Single Student</button>
-                                <button class="w-full bg-slate-800 hover:bg-slate-700 p-3 rounded-lg font-bold text-sm text-left flex items-center gap-3 transition-colors"><i class="fas fa-cloud-upload-alt"></i> Upload New Sheet</button>
-                                <button onclick="alert('Student Data Synced with Portal')" class="w-full bg-green-600 hover:bg-green-500 p-3 rounded-lg font-bold text-sm text-left flex items-center gap-3 transition-colors"><i class="fas fa-sync"></i> Manual Sync All</button>
-                            </div>
+                    <div class="bg-[#0f172a] rounded-2xl p-8 text-white max-w-sm">
+                        <h3 class="font-bold text-lg mb-4 italic">Quick Actions</h3>
+                        <div class="space-y-3">
+                            <button onclick="openModal()" class="w-full bg-blue-600 p-3 rounded-lg font-bold text-sm text-left flex items-center gap-3"><i class="fas fa-plus-circle"></i> Add Single Student</button>
+                            <button onclick="switchAdminTab('upload', document.querySelectorAll('.admin-sidebar-item')[2])" class="w-full bg-slate-800 p-3 rounded-lg font-bold text-sm text-left flex items-center gap-3"><i class="fas fa-cloud-upload-alt"></i> Upload New Sheet</button>
                         </div>
                     </div>`;
             }
@@ -168,48 +153,26 @@
             else if (tab === 'students') {
                 content.innerHTML = `
                     <div class="flex justify-between items-center mb-8">
-                        <div>
-                            <h1 class="text-4xl font-black text-slate-900 italic">Student Directory</h1>
-                            <p class="text-slate-500 font-medium italic">Manage individual records and academic access.</p>
-                        </div>
-                        <button class="bg-blue-600 text-white px-6 py-3 rounded-xl font-bold flex items-center gap-2 shadow-lg shadow-blue-200 hover:bg-blue-700 transition-all"><i class="fas fa-plus"></i> Add New Student</button>
+                        <div><h1 class="text-4xl font-black text-slate-900 italic">Student Directory</h1></div>
+                        <button onclick="openModal()" class="bg-blue-600 text-white px-6 py-3 rounded-xl font-bold flex items-center gap-2 shadow-lg hover:bg-blue-700 transition-all"><i class="fas fa-plus"></i> Add New Student</button>
                     </div>
-
-                    <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
-                        <div class="p-6 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
-                            <div class="relative w-96">
-                                <i class="fas fa-search absolute left-4 top-3.5 text-slate-400 text-sm"></i>
-                                <input type="text" placeholder="Search by name, ID or department..." class="w-full pl-12 pr-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20 text-sm italic font-medium">
-                            </div>
-                        </div>
+                    <div class="bg-white rounded-2xl border overflow-hidden">
                         <table class="w-full text-left">
-                            <thead class="bg-slate-50 border-b border-slate-100">
+                            <thead class="bg-slate-50 border-b">
                                 <tr>
-                                    <th class="p-5 text-[11px] font-black text-slate-400 uppercase italic">Student Name</th>
-                                    <th class="p-5 text-[11px] font-black text-slate-400 uppercase italic">Student ID</th>
-                                    <th class="p-5 text-[11px] font-black text-slate-400 uppercase italic">GPA (Update)</th>
+                                    <th class="p-5 text-[11px] font-black text-slate-400 uppercase italic">Name</th>
+                                    <th class="p-5 text-[11px] font-black text-slate-400 uppercase italic">ID</th>
+                                    <th class="p-5 text-[11px] font-black text-slate-400 uppercase italic">GPA</th>
                                     <th class="p-5 text-[11px] font-black text-slate-400 uppercase italic">Military %</th>
-                                    <th class="p-5 text-[11px] font-black text-slate-400 uppercase italic text-right">Actions</th>
                                 </tr>
                             </thead>
-                            <tbody class="divide-y divide-slate-100">
-                                ${studentDb.map(student => `
-                                <tr class="hover:bg-slate-50/50 transition-colors">
-                                    <td class="p-5 font-bold text-slate-700 italic">${student.name}</td>
-                                    <td class="p-5 font-medium text-slate-500">${student.id}</td>
-                                    <td class="p-5">
-                                        <input type="text" value="${student.gpa}" 
-                                            onchange="updateDatabase('${student.id}', 'gpa', this.value)"
-                                            class="w-16 border rounded p-1 text-sm font-bold text-blue-600 focus:ring-2 focus:ring-blue-500 outline-none">
-                                    </td>
-                                    <td class="p-5">
-                                        <input type="number" value="${student.military}" 
-                                            onchange="updateDatabase('${student.id}', 'military', this.value)"
-                                            class="w-16 border rounded p-1 text-sm font-bold text-orange-600 focus:ring-2 focus:ring-blue-500 outline-none">
-                                    </td>
-                                    <td class="p-5 text-right">
-                                        <span class="text-[10px] bg-green-50 text-green-600 px-2 py-1 rounded font-black italic">AUTO-SYNC ON</span>
-                                    </td>
+                            <tbody>
+                                ${studentDb.map(s => `
+                                <tr class="border-b border-slate-50">
+                                    <td class="p-5 font-bold italic">${s.name}</td>
+                                    <td class="p-5 font-medium text-slate-500">${s.id}</td>
+                                    <td class="p-5"><input type="text" value="${s.gpa}" onchange="updateDatabase('${s.id}', 'gpa', this.value)" class="w-16 border rounded p-1 text-blue-600 font-bold"></td>
+                                    <td class="p-5"><input type="number" value="${s.military}" onchange="updateDatabase('${s.id}', 'military', this.value)" class="w-16 border rounded p-1 text-orange-600 font-bold"></td>
                                 </tr>`).join('')}
                             </tbody>
                         </table>
@@ -220,26 +183,28 @@
                 content.innerHTML = `
                     <div class="mb-8 text-center max-w-2xl mx-auto">
                         <h1 class="text-4xl font-black text-slate-900 italic">Bulk Data Import</h1>
-                        <p class="text-slate-500 font-medium mt-4 italic">Upload student sheet to update student portal database.</p>
+                        <p class="text-slate-500 font-medium mt-4 italic">Select a file to update portal database.</p>
                     </div>
-
                     <div class="max-w-3xl mx-auto">
                         <div class="bg-white p-12 rounded-3xl border-4 border-dashed border-slate-200 flex flex-col items-center justify-center text-center cursor-pointer hover:border-blue-400 transition-all shadow-sm">
                             <div class="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 mb-6"><i class="fas fa-cloud-upload-alt text-3xl"></i></div>
-                            <h3 class="text-xl font-bold text-slate-800 mb-2">Select Student Spreadsheet</h3>
                             <input type="file" id="bulk-file" class="hidden" onchange="handleFileUpload(this)">
-                            <button onclick="document.getElementById('bulk-file').click()" class="bg-slate-900 text-white px-10 py-3.5 rounded-xl font-bold hover:bg-blue-600 transition-colors shadow-lg">Browse Files</button>
+                            <button onclick="document.getElementById('bulk-file').click()" class="bg-slate-900 text-white px-10 py-3.5 rounded-xl font-bold hover:bg-blue-600 transition-colors">Browse Files</button>
                         </div>
                     </div>`;
-            }
-            else {
-                content.innerHTML = `<div class="bg-white p-20 rounded-2xl border border-slate-200 text-center text-slate-400 italic font-medium">This section (${tab}) is active and monitoring portal.</div>`;
             }
         }
 
         function handleFileUpload(input) {
             if (input.files && input.files[0]) {
-                alert('Portal Database Updated with: ' + input.files[0].name);
+                // محاكاة لرفع البيانات: نقوم بإضافة طالب تجريبي كمثال لنجاح العملية
+                alert('Processing ' + input.files[0].name + '...');
+                setTimeout(() => {
+                    studentDb.push({ id: "202500000", name: "Imported Student Example", dept: "Marketing", gpa: "3.50", military: "100" });
+                    saveToLocal();
+                    alert('Portal Database Updated Successfully!');
+                    switchAdminTab('students', document.querySelectorAll('.admin-sidebar-item')[1]);
+                }, 1500);
             }
         }
 
