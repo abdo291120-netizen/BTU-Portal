@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Portal - BSUT</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; color: #1e293b; margin: 0; }
+        .sidebar-item { transition: all 0.2s; cursor: pointer; display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: 8px; color: #64748b; font-weight: 500; margin-bottom: 4px; }
+        .sidebar-item:hover { background-color: #f1f5f9; color: #2563eb; }
+        .sidebar-item.active { background-color: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe; }
+        .card { background: white; border-radius: 12px; border: 1px solid #e2e8f0; padding: 24px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+        .stat-label { font-size: 0.7rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.025em; }
+        @media print { 
+            .sidebar-item, aside, button, input { display: none !important; } 
+            main { margin-left: 0 !important; padding: 0 !important; }
+            .card { box-shadow: none; border: 1px solid #eee; }
+        }
+    </style>
+</head>
+<body class="flex min-h-screen">
+
+    <!-- Sidebar -->
+    <aside class="w-64 border-r border-slate-200 bg-white flex flex-col p-4 fixed h-full z-10">
+        <div class="mb-8 px-2">
+            <h1 class="text-xl font-bold text-slate-900 leading-tight">Business Administration</h1>
+            <p class="text-xs text-slate-500 font-medium italic">Beni Suef Technological University</p>
+        </div>
+        <nav id="sidebar-nav">
+            <div onclick="switchTab('dashboard', this)" class="sidebar-item active"><i class="fas fa-th-large"></i> Dashboard</div>
+            <div onclick="switchTab('personal', this)" class="sidebar-item"><i class="far fa-user"></i> Personal Information</div>
+            <div onclick="switchTab('academic', this)" class="sidebar-item"><i class="fas fa-graduation-cap"></i> Academic Record</div>
+            <div onclick="switchTab('results', this)" class="sidebar-item"><i class="fas fa-award"></i> Results</div>
+            <div onclick="switchTab('assignments', this)" class="sidebar-item"><i class="fas fa-book-open"></i> Assignments</div>
+            <div onclick="switchTab('military', this)" class="sidebar-item"><i class="fas fa-shield-alt"></i> Military Education</div>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 ml-64 p-10 bg-slate-50/50 min-h-screen">
+        <div id="dynamic-content" class="max-w-6xl mx-auto"></div>
+    </main>
+
+    <script>
+        // التعديل: جعل البيانات تسحب من الـ LocalStorage إذا وجدت تحديثات من الأدمن
+        const studentData = {
+            name: "Abdelrahman Sherif Ahmed",
+            id: "202509042",
+            dept: "Marketing",
+            year: "Year 1",
+            initials: "AS",
+            gpa: "0.00", // قيمة افتراضية
+            militaryProgress: "0" // قيمة افتراضية
+        };
+
+        // دالة لتحديث البيانات من مخزن الأدمن
+        function syncData() {
+            const db = JSON.parse(localStorage.getItem('BTU_DATABASE')) || [];
+            const myInfo = db.find(s => s.id === studentData.id);
+            if (myInfo) {
+                studentData.name = myInfo.name || studentData.name;
+                studentData.gpa = myInfo.gpa || "0.00";
+                studentData.militaryProgress = myInfo.military || "0";
+            }
+        }
+
+        // مراقب التغييرات: إذا قام الأدمن بحفظ بيانات جديدة، يتم تحديث التاب الحالية فوراً
+        window.addEventListener('storage', (e) => {
+            if (e.key === 'BTU_DATABASE') {
+                const activeItem = document.querySelector('.sidebar-item.active');
+                const currentTab = activeItem.getAttribute('onclick').match(/'([^']+)'/)[1];
+                switchTab(currentTab, activeItem);
+            }
+        });
+
+        function switchTab(tab, element) {
+            syncData(); // تحديث البيانات قبل عرض أي تاب
+            document.querySelectorAll('.sidebar-item').forEach(item => item.classList.remove('active'));
+            element.classList.add('active');
+            const content = document.getElementById('dynamic-content');
+
+            if (tab === 'dashboard') {
+                content.innerHTML = `
+                    <div class="mb-8"><h1 class="text-3xl font-bold text-slate-900">Student Dashboard</h1><p class="text-slate-500 mt-1 font-medium">Welcome back, ${studentData.name}</p></div>
+                    <div class="grid grid-cols-4 gap-4 mb-8">
+                        <div class="card"><p class="stat-label">Cumulative GPA</p><p class="text-4xl font-bold text-blue-600 mt-2">${studentData.gpa}</p></div>
+                        <div class="card"><p class="stat-label">Enrolled Courses</p><p class="text-4xl font-bold text-slate-800 mt-2">0</p></div>
+                        <div class="card"><p class="stat-label">Pending Assignments</p><p class="text-4xl font-bold text-orange-500 mt-2">0</p></div>
+                        <div class="card"><p class="stat-label">Completed Assignments</p><p class="text-4xl font-bold text-green-600 mt-2">0</p></div>
+                    </div>
+                    <div class="card"><h3 class="font-bold text-slate-800 mb-1">Recent Grades</h3><p class="text-xs text-slate-500 mb-6 font-medium">Your most recent academic results</p>
+                    <table class="w-full text-left text-sm"><tr class="text-slate-400 font-bold border-b border-slate-100"><th class="pb-3 px-2">Course</th><th class="pb-3 px-2">Semester</th><th class="pb-3 px-2">Score</th><th class="pb-3 px-2">Letter Grade</th></tr>
+                    <tr><td colspan="4" class="py-12 text-center text-slate-400 font-medium italic">No recent grades</td></tr></table></div>`;
+            } 
+            
+            else if (tab === 'personal') {
+                content.innerHTML = `
+                    <div class="mb-8"><h1 class="text-3xl font-bold text-slate-900 italic">Personal Information</h1><p class="text-slate-500 mt-1 font-medium italic">Your profile and account details</p></div>
+                    <div class="card p-0 overflow-hidden mb-6 border-none shadow-sm">
+                        <div class="h-32 bg-gradient-to-r from-blue-700 to-indigo-900"></div>
+                        <div class="px-8 pb-6 flex justify-between items-end -mt-12 relative z-10">
+                            <div class="flex items-center gap-6">
+                                <div class="w-32 h-32 rounded-full bg-white border-4 border-white shadow-lg flex items-center justify-center text-blue-700 text-4xl font-bold">${studentData.initials}</div>
+                                <div class="mb-2"><h2 class="text-3xl font-bold text-slate-800 italic">${studentData.name}</h2><p class="text-slate-500 font-medium italic">${studentData.dept} · ${studentData.year}</p></div>
+                            </div>
+                            <div class="mb-4"><button class="bg-blue-600 text-white px-8 py-2 rounded-md font-bold text-sm">GPA ${studentData.gpa}</button></div>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-6">
+                        <div class="card"><div class="flex items-center gap-2 mb-1 text-blue-600"><i class="far fa-user text-sm"></i><h3 class="font-bold text-slate-800 italic">Account Details</h3></div><p class="text-xs text-slate-400 mb-6 font-medium italic">Your registered information</p>
+                        <div class="space-y-4 text-sm">
+                            <div class="flex items-start gap-3"><i class="far fa-user text-slate-300 mt-1"></i><div><p class="text-[10px] font-bold text-slate-400 uppercase italic">Full Name</p><p class="font-bold italic">${studentData.name}</p></div></div>
+                            <div class="flex items-start gap-3"><i class="far fa-id-card text-slate-300 mt-1"></i><div><p class="text-[10px] font-bold text-slate-400 uppercase italic">University ID</p><p class="font-bold italic">${studentData.id}</p></div></div>
+                            <div class="flex items-start gap-3"><i class="fas fa-building text-slate-300 mt-1"></i><div><p class="text-[10px] font-bold text-slate-400 uppercase italic">Department</p><p class="font-bold italic">${studentData.dept}</p></div></div>
+                        </div></div>
+                        <div class="card"><div class="flex items-center gap-2 mb-1 text-blue-600"><i class="far fa-envelope text-sm"></i><h3 class="font-bold text-slate-800 italic">Contact Information</h3></div><p class="text-xs text-slate-400 mb-6 font-medium italic">How we can reach you</p>
+                        <div class="space-y-4 text-sm">
+                            <div class="flex items-start gap-3"><i class="far fa-envelope text-slate-300 mt-1"></i><div><p class="text-[10px] font-bold text-slate-400 uppercase italic">Email Address</p><p class="font-medium italic text-slate-400">Not provided</p></div></div>
+                            <div class="flex items-start gap-3"><i class="fas fa-phone text-slate-300 mt-1"></i><div><p class="text-[10px] font-bold text-slate-400 uppercase italic">Phone Number</p><p class="font-medium italic text-slate-400">Not provided</p></div></div>
+                            <div class="flex items-start gap-3"><i class="far fa-calendar-alt text-slate-300 mt-1"></i><div><p class="text-[10px] font-bold text-slate-400 uppercase italic">Member Since</p><p class="font-bold italic text-slate-700">May 2026</p></div></div>
+                        </div></div>
+                    </div>`;
+            }
+
+            else if (tab === 'academic') {
+                content.innerHTML = `
+                    <div class="mb-8"><h1 class="text-3xl font-bold text-slate-900 italic">Academic Record</h1><p class="text-slate-500 mt-1 font-medium">Complete grade history and GPA calculation</p></div>
+                    <div class="grid grid-cols-2 gap-6 mb-8">
+                        <div class="card border-blue-100 bg-blue-50/20"><p class="stat-label text-blue-600">Cumulative GPA</p><p class="text-6xl font-bold text-blue-600 mt-2">${studentData.gpa}</p></div>
+                        <div class="card"><p class="stat-label">Total Completed Credits</p><p class="text-6xl font-bold text-slate-800 mt-2">0</p><p class="text-xs text-slate-400 mt-2 font-medium italic">Assuming 3 credits per course</p></div>
+                    </div>
+                    <div class="card"><h3 class="font-bold text-slate-800 mb-1">Course Grades</h3><p class="text-xs text-slate-500 mb-6 font-medium">All your completed courses and grades</p>
+                    <table class="w-full text-left text-sm border-separate border-spacing-y-4"><tr class="text-slate-400 font-bold border-b border-slate-100"><th class="pb-3 px-4">Course</th><th class="pb-3 px-4">Code</th><th class="pb-3 px-4">Semester</th><th class="pb-3 px-4">Score</th><th class="pb-3 px-4">Grade</th></tr>
+                    <tr><td colspan="5" class="py-16 text-center text-slate-400 font-medium italic">No grades found in your record.</td></tr></table></div>`;
+            }
+
+            else if (tab === 'results') {
+                content.innerHTML = `
+                    <div class="flex justify-between items-center mb-8"><div><h1 class="text-3xl font-bold text-slate-900 italic">Student Results</h1><p class="text-slate-500 mt-1 font-medium italic">Official academic results and transcript for ${studentData.name}</p></div>
+                    <button onclick="window.print()" class="border border-slate-200 hover:bg-white bg-slate-50 px-4 py-2 rounded-md text-sm font-bold flex items-center gap-2 transition-all shadow-sm"><i class="fas fa-print"></i> Print Transcript</button></div>
+                    <div class="grid grid-cols-4 gap-4 mb-8">
+                        <div class="card border-blue-100 bg-blue-50/30"><div class="flex items-center gap-2 text-blue-600 mb-2"><i class="fas fa-award text-xs"></i><p class="stat-label text-blue-600">Cumulative GPA</p></div><p class="text-4xl font-bold text-blue-700">${studentData.gpa}</p><span class="inline-block bg-red-600 text-white text-[10px] font-bold px-2 py-0.5 rounded mt-2 uppercase">Probation</span></div>
+                        <div class="card"><div class="flex items-center gap-2 text-slate-400 mb-2"><i class="far fa-check-square text-xs"></i><p class="stat-label">Total Courses</p></div><p class="text-4xl font-bold text-slate-800">0</p></div>
+                        <div class="card"><div class="flex items-center gap-2 text-green-600 mb-2"><i class="far fa-check-circle text-xs"></i><p class="stat-label text-green-600">Passed</p></div><p class="text-4xl font-bold text-green-600">0</p></div>
+                        <div class="card"><div class="flex items-center gap-2 text-red-600 mb-2"><i class="far fa-times-circle text-xs"></i><p class="stat-label text-red-600">Failed</p></div><p class="text-4xl font-bold text-red-600">0</p></div>
+                    </div>
+                    <div class="card py-20 flex flex-col items-center justify-center border-dashed border-2 bg-white/50"><i class="far fa-calendar-alt text-4xl text-slate-200 mb-4"></i><p class="font-bold text-slate-600 italic">No results have been published yet.</p><p class="text-slate-400 text-sm mt-1 italic">Your academic results will appear here once available.</p></div>`;
+            }
+
+            else if (tab === 'assignments') {
+                content.innerHTML = `
+                    <div class="mb-8"><h1 class="text-3xl font-bold text-slate-900 italic">Assignments</h1><p class="text-slate-500 mt-1 font-medium italic">Manage and submit your coursework</p></div>
+                    <div class="mb-8"><div class="flex items-center gap-2 text-orange-600 mb-3"><i class="far fa-clock"></i><h3 class="font-bold italic">Pending Assignments (0)</h3></div>
+                    <div class="card border-dashed bg-slate-50/50 py-8 text-center text-slate-500 text-sm font-medium italic">No pending assignments. You're all caught up!</div></div>
+                    <div><div class="flex items-center gap-2 text-green-600 mb-3"><i class="far fa-check-circle"></i><h3 class="font-bold italic">Submitted Assignments (0)</h3></div>
+                    <div class="card border-dashed bg-slate-50/50 py-8 text-center text-slate-500 text-sm font-medium italic">You haven't submitted any assignments yet.</div></div>`;
+            }
+
+            else if (tab === 'military') {
+                content.innerHTML = `
+                    <div class="flex justify-between items-center mb-8"><div><h1 class="text-3xl font-bold text-slate-900 italic flex items-center gap-3"><i class="fas fa-shield-alt text-blue-600"></i> Military Education</h1><p class="text-slate-500 mt-1 font-medium italic">Track your attendance and required visits</p></div><span class="bg-orange-500 text-white px-4 py-1 rounded font-bold text-sm shadow-sm">In Progress</span></div>
+                    <div class="card mb-6 border-blue-100 bg-blue-50/10"><p class="font-bold text-slate-700 text-sm italic">Overall Progress</p>
+                        <div class="flex items-center gap-6 mt-4"><p class="text-5xl font-bold text-blue-600 italic">${studentData.militaryProgress}%</p><div class="flex-1"><div class="w-full bg-slate-200 h-2 rounded-full"><div class="bg-blue-600 h-full transition-all duration-500" style="width: ${studentData.militaryProgress}%"></div></div><p class="text-xs text-slate-400 mt-2 font-bold uppercase italic">${100 - studentData.militaryProgress}% remaining to complete the program.</p></div></div>
+                    </div>
+                    <div class="grid grid-cols-3 gap-4 mb-8">
+                        <div class="card"><div class="flex items-center gap-2 text-blue-600 mb-4"><i class="far fa-calendar-check"></i><p class="stat-label">Attendance</p></div><p class="text-4xl font-bold text-slate-800 italic">0 <span class="text-lg text-slate-300">/ 12 sessions</span></p></div>
+                        <div class="card"><div class="flex items-center gap-2 text-teal-600 mb-4"><i class="fas fa-map-marker-alt"></i><p class="stat-label">Required Visits</p></div><p class="text-4xl font-bold text-slate-800 italic">0 <span class="text-lg text-slate-300">/ 4 visits</span></p></div>
+                        <div class="card"><div class="flex items-center gap-2 text-purple-600 mb-4"><i class="fas fa-book"></i><p class="stat-label">Courses</p></div><p class="text-4xl font-bold text-slate-800 italic">0 <span class="text-lg text-slate-300">/ 3 courses</span></p></div>
+                    </div>
+                    <div class="card">
+                        <div class="flex items-center gap-2 text-blue-600 mb-1"><i class="fas fa-file-contract"></i><h3 class="font-bold text-slate-800 italic">Completion Certificate</h3></div>
+                        <p class="text-xs text-slate-500 mb-6 font-medium italic">Upload the official military education certificate you received</p>
+                        <input type="file" id="cert-upload" class="hidden" onchange="alert('Selected file: ' + this.files[0].name)">
+                        <button onclick="document.getElementById('cert-upload').click()" class="bg-slate-900 hover:bg-slate-800 text-white px-6 py-2.5 rounded-md font-bold text-sm flex items-center gap-2 transition-all active:scale-95 shadow-sm"><i class="fas fa-upload"></i> Upload Certificate</button>
+                    </div>`;
+            }
+        }
+
+        window.onload = () => switchTab('dashboard', document.querySelector('.sidebar-item'));
+    </script>
+</body>
+</html>
