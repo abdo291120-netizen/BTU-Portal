@@ -6,6 +6,7 @@
     <title>Admin Control - BSUT</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
         body { font-family: 'Inter', sans-serif; background-color: #f1f5f9; color: #0f172a; }
@@ -14,24 +15,18 @@
         .admin-sidebar-item.active { background-color: #2563eb; color: white; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2); }
         .stat-card { background: white; border-radius: 16px; padding: 24px; border: 1px solid #e2e8f0; }
         #lock-screen { position: fixed; inset: 0; background: #0f172a; z-index: 100; display: flex; align-items: center; justify-content: center; flex-direction: column; color: white; }
-        /* Modal Style */
         #add-student-modal { display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.8); z-index: 50; align-items: center; justify-content: center; }
     </style>
 </head>
 <body class="flex min-h-screen">
 
-    <!-- نافذة إضافة طالب جديد (Modal) -->
     <div id="add-student-modal">
         <div class="bg-white rounded-2xl p-8 w-full max-w-md shadow-2xl">
             <h2 class="text-2xl font-bold mb-6 italic">Add New Student</h2>
             <div class="space-y-4">
                 <input type="text" id="new-name" placeholder="Full Name" class="w-full p-3 border rounded-xl outline-none focus:ring-2 focus:ring-blue-500">
-                <input type="text" id="new-id" placeholder="Student ID (e.g. 202509042)" class="w-full p-3 border rounded-xl outline-none focus:ring-2 focus:ring-blue-500">
-                <select id="new-dept" class="w-full p-3 border rounded-xl outline-none focus:ring-2 focus:ring-blue-500 bg-white">
-                    <option value="Marketing Technology">Marketing Technology</option>
-                    <option value="Information Technology">Information Technology</option>
-                    <option value="Mechatronics">Mechatronics</option>
-                </select>
+                <input type="text" id="new-id" placeholder="Student ID" class="w-full p-3 border rounded-xl outline-none focus:ring-2 focus:ring-blue-500">
+                <input type="text" id="new-dept" placeholder="Department" class="w-full p-3 border rounded-xl outline-none focus:ring-2 focus:ring-blue-500">
                 <div class="flex gap-3 mt-6">
                     <button onclick="closeModal()" class="flex-1 py-3 font-bold text-slate-500 hover:bg-slate-100 rounded-xl">Cancel</button>
                     <button onclick="saveStudent()" class="flex-1 py-3 font-bold bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-all">Save Student</button>
@@ -40,58 +35,41 @@
         </div>
     </div>
 
-    <!-- شاشة الحماية بالباسورد -->
     <div id="lock-screen">
         <div class="w-full max-w-md p-8 text-center">
-            <div class="w-20 h-20 bg-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-2xl">
-                <i class="fas fa-lock text-3xl"></i>
-            </div>
+            <div class="w-20 h-20 bg-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-2xl"><i class="fas fa-lock text-3xl"></i></div>
             <h2 class="text-2xl font-bold mb-2 italic">Admin Verification</h2>
-            <input type="password" id="admin-pass" placeholder="Enter Password" class="w-full p-4 rounded-xl bg-slate-800 border border-slate-700 text-white text-center focus:outline-none focus:ring-2 focus:ring-blue-500 mb-4 font-bold">
+            <input type="password" id="admin-pass" placeholder="Enter Password" class="w-full p-4 rounded-xl bg-slate-800 border border-slate-700 text-white text-center mb-4 font-bold">
             <button onclick="verifyAccess()" class="w-full bg-blue-600 hover:bg-blue-500 p-4 rounded-xl font-bold transition-all">Verify Access</button>
-            <p id="error-msg" class="text-red-500 mt-4 text-sm font-bold hidden italic">Incorrect Password!</p>
         </div>
     </div>
 
-    <!-- Sidebar -->
     <aside class="w-72 bg-[#0f172a] text-white flex flex-col p-6 fixed h-full z-20">
         <div class="mb-10 px-2">
             <div class="flex items-center gap-3 mb-2">
                 <div class="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center"><i class="fas fa-user-shield text-xl"></i></div>
                 <h1 class="text-xl font-bold tracking-tight">Admin Central</h1>
             </div>
-            <p class="text-[10px] text-slate-500 font-bold uppercase tracking-widest italic">BSU Technological University</p>
         </div>
         <nav class="space-y-2">
             <div onclick="switchAdminTab('overview', this)" class="admin-sidebar-item active"><i class="fas fa-chart-pie"></i> Overview</div>
             <div onclick="switchAdminTab('students', this)" class="admin-sidebar-item"><i class="fas fa-users"></i> Manage Students</div>
             <div onclick="switchAdminTab('upload', this)" class="admin-sidebar-item"><i class="fas fa-file-import"></i> Bulk Import</div>
-            <div onclick="switchAdminTab('grades', this)" class="admin-sidebar-item"><i class="fas fa-edit"></i> Grading Portal</div>
         </nav>
-        <div class="mt-auto p-4 bg-slate-800/50 rounded-xl border border-slate-700">
-            <div class="flex items-center gap-3">
-                <div class="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-xs font-bold">ADM</div>
-                <div><p class="text-xs font-bold">Admin Panel</p><p class="text-[10px] text-slate-400 font-bold">v2.0.26</p></div>
-            </div>
-        </div>
     </aside>
 
-    <!-- Main Content -->
     <main class="flex-1 ml-72 p-10">
         <div id="admin-dynamic-content" class="max-w-7xl mx-auto"></div>
     </main>
 
     <script>
         function verifyAccess() {
-            const passInput = document.getElementById('admin-pass').value;
-            if (passInput === "29112006") {
+            if (document.getElementById('admin-pass').value === "29112006") {
                 document.getElementById('lock-screen').style.display = 'none';
-            } else {
-                document.getElementById('error-msg').classList.remove('hidden');
-                setTimeout(() => document.getElementById('error-msg').classList.add('hidden'), 2000);
-            }
+            } else { alert("Incorrect Password!"); }
         }
 
+        // قاعدة البيانات الأساسية
         let studentDb = JSON.parse(localStorage.getItem('BTU_DATABASE')) || [
             { id: "202509042", name: "Abdelrahman Sherif Ahmed", dept: "Marketing Technology", gpa: "0.00", military: "0" }
         ];
@@ -100,32 +78,57 @@
             localStorage.setItem('BTU_DATABASE', JSON.stringify(studentDb));
         }
 
-        function updateDatabase(studentId, field, value) {
-            const index = studentDb.findIndex(s => s.id === studentId);
-            if (index !== -1) {
-                studentDb[index][field] = value;
-                saveToLocal();
-            }
-        }
-
-        // وظائف نافذة الإضافة
         function openModal() { document.getElementById('add-student-modal').style.display = 'flex'; }
         function closeModal() { document.getElementById('add-student-modal').style.display = 'none'; }
-        
+
         function saveStudent() {
             const name = document.getElementById('new-name').value;
             const id = document.getElementById('new-id').value;
             const dept = document.getElementById('new-dept').value;
-
             if(name && id) {
                 studentDb.push({ id, name, dept, gpa: "0.00", military: "0" });
-                saveToLocal();
-                closeModal();
+                saveToLocal(); closeModal();
                 switchAdminTab('students', document.querySelectorAll('.admin-sidebar-item')[1]);
-                alert('Student added successfully!');
-            } else {
-                alert('Please fill all fields');
             }
+        }
+
+        // --- وظيفة قراءة ملف الإكسيل الحقيقية ---
+        function handleExcelUpload(event) {
+            const file = event.target.files[0];
+            const reader = new FileReader();
+
+            reader.onload = function(e) {
+                const data = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(data, { type: 'array' });
+                
+                // قراءة أول ورقة في ملف الإكسيل
+                const firstSheetName = workbook.SheetNames[0];
+                const worksheet = workbook.Sheets[firstSheetName];
+                
+                // تحويل البيانات إلى JSON
+                const jsonData = XLSX.utils.sheet_to_json(worksheet);
+
+                if (jsonData.length > 0) {
+                    // دمج البيانات الجديدة مع القديمة (أو استبدالها حسب رغبتك)
+                    jsonData.forEach(row => {
+                        // التأكد من وجود البيانات الأساسية قبل الإضافة
+                        if(row.ID || row.id) {
+                            studentDb.push({
+                                id: String(row.ID || row.id || ""),
+                                name: String(row.Name || row.name || "Unknown"),
+                                dept: String(row.Dept || row.dept || "General"),
+                                gpa: String(row.GPA || row.gpa || "0.00"),
+                                military: String(row.Military || row.military || "0")
+                            });
+                        }
+                    });
+
+                    saveToLocal();
+                    alert(`Successfully imported ${jsonData.length} students from Excel!`);
+                    switchAdminTab('students', document.querySelectorAll('.admin-sidebar-item')[1]);
+                }
+            };
+            reader.readAsArrayBuffer(file);
         }
 
         function switchAdminTab(tab, element) {
@@ -135,35 +138,23 @@
 
             if (tab === 'overview') {
                 content.innerHTML = `
-                    <div class="flex justify-between items-end mb-8">
-                        <div><h1 class="text-4xl font-black text-slate-900 italic">Dashboard Overview</h1><p class="text-slate-500 font-medium mt-2 italic">Real-time system analytics.</p></div>
-                    </div>
+                    <h1 class="text-4xl font-black mb-8 italic">Dashboard Overview</h1>
                     <div class="grid grid-cols-4 gap-6 mb-10">
                         <div class="stat-card"><p class="text-slate-500 text-xs font-bold uppercase">Total Students</p><p class="text-3xl font-black mt-1">${studentDb.length}</p></div>
-                    </div>
-                    <div class="bg-[#0f172a] rounded-2xl p-8 text-white max-w-sm">
-                        <h3 class="font-bold text-lg mb-4 italic">Quick Actions</h3>
-                        <div class="space-y-3">
-                            <button onclick="openModal()" class="w-full bg-blue-600 p-3 rounded-lg font-bold text-sm text-left flex items-center gap-3"><i class="fas fa-plus-circle"></i> Add Single Student</button>
-                            <button onclick="switchAdminTab('upload', document.querySelectorAll('.admin-sidebar-item')[2])" class="w-full bg-slate-800 p-3 rounded-lg font-bold text-sm text-left flex items-center gap-3"><i class="fas fa-cloud-upload-alt"></i> Upload New Sheet</button>
-                        </div>
                     </div>`;
-            }
-
-            else if (tab === 'students') {
+            } else if (tab === 'students') {
                 content.innerHTML = `
                     <div class="flex justify-between items-center mb-8">
-                        <div><h1 class="text-4xl font-black text-slate-900 italic">Student Directory</h1></div>
-                        <button onclick="openModal()" class="bg-blue-600 text-white px-6 py-3 rounded-xl font-bold flex items-center gap-2 shadow-lg hover:bg-blue-700 transition-all"><i class="fas fa-plus"></i> Add New Student</button>
+                        <h1 class="text-4xl font-black italic">Student Directory</h1>
+                        <button onclick="openModal()" class="bg-blue-600 text-white px-6 py-3 rounded-xl font-bold shadow-lg">Add Student</button>
                     </div>
                     <div class="bg-white rounded-2xl border overflow-hidden">
                         <table class="w-full text-left">
                             <thead class="bg-slate-50 border-b">
                                 <tr>
-                                    <th class="p-5 text-[11px] font-black text-slate-400 uppercase italic">Name</th>
-                                    <th class="p-5 text-[11px] font-black text-slate-400 uppercase italic">ID</th>
-                                    <th class="p-5 text-[11px] font-black text-slate-400 uppercase italic">GPA</th>
-                                    <th class="p-5 text-[11px] font-black text-slate-400 uppercase italic">Military %</th>
+                                    <th class="p-5 text-[11px] font-black text-slate-400 uppercase">Name</th>
+                                    <th class="p-5 text-[11px] font-black text-slate-400 uppercase">ID</th>
+                                    <th class="p-5 text-[11px] font-black text-slate-400 uppercase">GPA</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -171,40 +162,23 @@
                                 <tr class="border-b border-slate-50">
                                     <td class="p-5 font-bold italic">${s.name}</td>
                                     <td class="p-5 font-medium text-slate-500">${s.id}</td>
-                                    <td class="p-5"><input type="text" value="${s.gpa}" onchange="updateDatabase('${s.id}', 'gpa', this.value)" class="w-16 border rounded p-1 text-blue-600 font-bold"></td>
-                                    <td class="p-5"><input type="number" value="${s.military}" onchange="updateDatabase('${s.id}', 'military', this.value)" class="w-16 border rounded p-1 text-orange-600 font-bold"></td>
+                                    <td class="p-5 font-bold text-blue-600">${s.gpa}</td>
                                 </tr>`).join('')}
                             </tbody>
                         </table>
                     </div>`;
-            }
-
-            else if (tab === 'upload') {
+            } else if (tab === 'upload') {
                 content.innerHTML = `
-                    <div class="mb-8 text-center max-w-2xl mx-auto">
-                        <h1 class="text-4xl font-black text-slate-900 italic">Bulk Data Import</h1>
-                        <p class="text-slate-500 font-medium mt-4 italic">Select a file to update portal database.</p>
-                    </div>
-                    <div class="max-w-3xl mx-auto">
-                        <div class="bg-white p-12 rounded-3xl border-4 border-dashed border-slate-200 flex flex-col items-center justify-center text-center cursor-pointer hover:border-blue-400 transition-all shadow-sm">
-                            <div class="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 mb-6"><i class="fas fa-cloud-upload-alt text-3xl"></i></div>
-                            <input type="file" id="bulk-file" class="hidden" onchange="handleFileUpload(this)">
-                            <button onclick="document.getElementById('bulk-file').click()" class="bg-slate-900 text-white px-10 py-3.5 rounded-xl font-bold hover:bg-blue-600 transition-colors">Browse Files</button>
+                    <div class="max-w-3xl mx-auto text-center">
+                        <h1 class="text-4xl font-black mb-4 italic">Bulk Data Import</h1>
+                        <p class="text-slate-500 mb-8 font-medium">Upload Excel (.xlsx) file to import all students at once.</p>
+                        <div class="bg-white p-16 rounded-3xl border-4 border-dashed border-slate-200">
+                            <i class="fas fa-file-excel text-5xl text-green-600 mb-6"></i>
+                            <h3 class="text-xl font-bold mb-4">Select Spreadsheet File</h3>
+                            <input type="file" id="excel-input" class="hidden" accept=".xlsx, .xls" onchange="handleExcelUpload(event)">
+                            <button onclick="document.getElementById('excel-input').click()" class="bg-green-600 text-white px-12 py-4 rounded-xl font-bold hover:bg-green-700 transition-all">Choose Excel File</button>
                         </div>
                     </div>`;
-            }
-        }
-
-        function handleFileUpload(input) {
-            if (input.files && input.files[0]) {
-                // محاكاة لرفع البيانات: نقوم بإضافة طالب تجريبي كمثال لنجاح العملية
-                alert('Processing ' + input.files[0].name + '...');
-                setTimeout(() => {
-                    studentDb.push({ id: "202500000", name: "Imported Student Example", dept: "Marketing", gpa: "3.50", military: "100" });
-                    saveToLocal();
-                    alert('Portal Database Updated Successfully!');
-                    switchAdminTab('students', document.querySelectorAll('.admin-sidebar-item')[1]);
-                }, 1500);
             }
         }
 
