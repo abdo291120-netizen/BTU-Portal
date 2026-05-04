@@ -29,7 +29,7 @@
             <h1 class="text-xl font-bold text-slate-900 leading-tight">Business Administration</h1>
             <p class="text-xs text-slate-500 font-medium italic">Beni Suef Technological University</p>
         </div>
-        <nav id="sidebar-nav">
+        <nav id="sidebar-nav" class="flex-1">
             <div onclick="switchTab('dashboard', this)" class="sidebar-item active"><i class="fas fa-th-large"></i> Dashboard</div>
             <div onclick="switchTab('personal', this)" class="sidebar-item"><i class="far fa-user"></i> Personal Information</div>
             <div onclick="switchTab('academic', this)" class="sidebar-item"><i class="fas fa-graduation-cap"></i> Academic Record</div>
@@ -37,6 +37,13 @@
             <div onclick="switchTab('assignments', this)" class="sidebar-item"><i class="fas fa-book-open"></i> Assignments</div>
             <div onclick="switchTab('military', this)" class="sidebar-item"><i class="fas fa-shield-alt"></i> Military Education</div>
         </nav>
+        
+        <!-- زر تسجيل الخروج مضاف في أسفل القائمة -->
+        <div class="mt-auto border-t border-slate-100 pt-4">
+            <div onclick="logout()" class="sidebar-item text-red-500 hover:bg-red-50 hover:text-red-600">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </div>
+        </div>
     </aside>
 
     <!-- Main Content -->
@@ -45,18 +52,16 @@
     </main>
 
     <script>
-        // التعديل: جعل البيانات تسحب من الـ LocalStorage إذا وجدت تحديثات من الأدمن
         const studentData = {
             name: "Abdelrahman Sherif Ahmed",
             id: "202509042",
             dept: "Marketing",
             year: "Year 1",
             initials: "AS",
-            gpa: "0.00", // قيمة افتراضية
-            militaryProgress: "0" // قيمة افتراضية
+            gpa: "0.00", 
+            militaryProgress: "0" 
         };
 
-        // دالة لتحديث البيانات من مخزن الأدمن
         function syncData() {
             const db = JSON.parse(localStorage.getItem('BTU_DATABASE')) || [];
             const myInfo = db.find(s => s.id === studentData.id);
@@ -67,17 +72,27 @@
             }
         }
 
-        // مراقب التغييرات: إذا قام الأدمن بحفظ بيانات جديدة، يتم تحديث التاب الحالية فوراً
         window.addEventListener('storage', (e) => {
             if (e.key === 'BTU_DATABASE') {
                 const activeItem = document.querySelector('.sidebar-item.active');
-                const currentTab = activeItem.getAttribute('onclick').match(/'([^']+)'/)[1];
-                switchTab(currentTab, activeItem);
+                if(activeItem) {
+                    const currentTab = activeItem.getAttribute('onclick').match(/'([^']+)'/)[1];
+                    switchTab(currentTab, activeItem);
+                }
             }
         });
 
+        // دالة تسجيل الخروج
+        function logout() {
+            if(confirm("Are you sure you want to logout from BTU Portal?")) {
+                localStorage.removeItem('BTU_DATABASE'); // اختيار اختياري: إذا أردت مسح البيانات المخزنة محلياً عند الخروج
+                alert("Logged out successfully.");
+                location.reload(); 
+            }
+        }
+
         function switchTab(tab, element) {
-            syncData(); // تحديث البيانات قبل عرض أي تاب
+            syncData(); 
             document.querySelectorAll('.sidebar-item').forEach(item => item.classList.remove('active'));
             element.classList.add('active');
             const content = document.getElementById('dynamic-content');
