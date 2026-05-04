@@ -53,7 +53,7 @@
                         <option value="Marketing">Marketing</option>
                     </select>
                 </div>
-                <button onclick="loginStudent()" class="w-full bg-[#111827] text-white font-bold py-3 rounded-lg hover:bg-slate-800 transition-all mt-4">Sign In</button>
+                <button id="login-btn" class="w-full bg-[#111827] text-white font-bold py-3 rounded-lg hover:bg-slate-800 transition-all mt-4">Sign In</button>
             </div>
         </div>
     </div>
@@ -69,7 +69,7 @@
                 <div onclick="switchTab('personal', this)" class="sidebar-item"><i class="far fa-user"></i> Personal Information</div>
             </nav>
             <div class="mt-auto border-t border-slate-100 pt-4">
-                <div onclick="logout()" class="sidebar-item text-red-500 hover:bg-red-50"><i class="fas fa-sign-out-alt"></i> Logout</div>
+                <div id="logout-btn" class="sidebar-item text-red-500 hover:bg-red-50"><i class="fas fa-sign-out-alt"></i> Logout</div>
             </div>
         </aside>
 
@@ -78,41 +78,66 @@
         </main>
     </div>
 
-    <script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js";
+        import { getDatabase, ref, get, child } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBwg2LRk5wbTMuYNoqoP3Pd5zlOvgXBEIY",
+            authDomain: "btu-portal.firebaseapp.com",
+            databaseURL: "https://btu-portal-default-rtdb.firebaseio.com",
+            projectId: "btu-portal",
+            storageBucket: "btu-portal.firebasestorage.app",
+            messagingSenderId: "89595921223",
+            appId: "1:89595921223:web:6f2039fb0dfeac1c08c262"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
         let currentStudent = null;
 
-        function loginStudent() {
+        // وظيفة تسجيل الدخول
+        async function loginStudent() {
             const name = document.getElementById('std-name').value.trim();
             const id = document.getElementById('std-id').value.trim();
-            const dept = document.getElementById('std-dept').value;
+            
+            if(!name || !id) return alert("Please fill all fields");
 
-            // جلب البيانات من صفحة الأدمن
-            const db = JSON.parse(localStorage.getItem('BTU_PORTAL_DB')) || [];
+            const dbRef = ref(db);
+            try {
+                const snapshot = await get(child(dbRef, 'students'));
+                if (snapshot.exists()) {
+                    const students = snapshot.val();
+                    const student = Object.values(students).find(s => 
+                        s.name.trim().toLowerCase() === name.toLowerCase() && String(s.id) === id
+                    );
 
-            // البحث عن الطالب
-            const student = db.find(s => 
-                s.name.toLowerCase() === name.toLowerCase() && 
-                s.id === id
-            );
-
-            if (student) {
-                currentStudent = {
-                    ...student,
-                    initials: student.name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2)
-                };
-                document.getElementById('login-page').classList.add('hidden');
-                document.getElementById('main-portal').classList.remove('hidden');
-                switchTab('dashboard', document.querySelector('.sidebar-item'));
-            } else {
-                alert("بيانات الدخول غير صحيحة. يرجى التأكد من الاسم والرقم الجامعي كما هو مسجل في الشيت.");
+                    if (student) {
+                        currentStudent = {
+                            ...student,
+                            initials: student.name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2)
+                        };
+                        document.getElementById('login-page').classList.add('hidden');
+                        document.getElementById('main-portal').classList.remove('hidden');
+                        window.switchTab('dashboard', document.querySelector('.sidebar-item'));
+                    } else {
+                        alert("Invalid Name or ID. Please check the data uploaded by Admin.");
+                    }
+                } else {
+                    alert("No data found in the cloud. Admin must upload the Excel sheet first.");
+                }
+            } catch (e) {
+                console.error(e);
+                alert("Connection Error. Check your internet.");
             }
         }
 
-        function logout() {
-            location.reload();
-        }
+        // ربط الأزرار
+        document.getElementById('login-btn').onclick = loginStudent;
+        document.getElementById('logout-btn').onclick = () => location.reload();
 
-        function switchTab(tab, element) {
+        // جعل دالة التبديل متاحة عالمياً
+        window.switchTab = function(tab, element) {
             document.querySelectorAll('.sidebar-item').forEach(item => item.classList.remove('active'));
             element.classList.add('active');
             const content = document.getElementById('dynamic-content');
@@ -130,19 +155,15 @@
                     <div class="card bg-white p-8">
                         <div class="flex items-center gap-6 mb-8">
                             <div class="w-24 h-24 rounded-full bg-blue-600 text-white flex items-center justify-center text-3xl font-bold">${currentStudent.initials}</div>
-                            <div>
-                                <h2 class="text-2xl font-bold">${currentStudent.name}</h2>
-                                <p class="text-slate-500">${currentStudent.id}</p>
-                            </div>
+                            <div><h2 class="text-2xl font-bold">${currentStudent.name}</h2><p class="text-slate-500">${currentStudent.id}</p></div>
                         </div>
                         <div class="grid grid-cols-2 gap-8">
                             <div><p class="text-xs font-bold text-slate-400 uppercase">Phone</p><p class="font-medium">${currentStudent.phone || 'N/A'}</p></div>
-                            <div><p class="text-xs font-bold text-slate-400 uppercase">Parent Phone</p><p class="font-medium">${currentStudent.parent || 'N/A'}</p></div>
                             <div><p class="text-xs font-bold text-slate-400 uppercase">Level</p><p class="font-medium">${currentStudent.level || 'N/A'}</p></div>
                         </div>
                     </div>`;
             }
-        }
+        };
     </script>
 </body>
 </html>
