@@ -3,118 +3,136 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BTU System - Admin Expert</title>
+    <title>BTU Admin - Pro Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap');
-        body { font-family: 'Cairo', sans-serif; background: #f1f5f9; color: #1e293b; }
-        .sidebar { background: #0f172a; }
-        .glass-card { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(10px); border: 1px solid #e2e8f0; }
-        .student-row:hover { background: #f8fafc; cursor: pointer; }
+        body { font-family: 'Cairo', sans-serif; background: #0f172a; color: #f1f5f9; }
+        .nav-item { transition: 0.3s; cursor: pointer; border-radius: 12px; margin-bottom: 5px; }
+        .nav-item:hover, .nav-item.active { background: #3b82f6; color: white; }
+        .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); }
         .hidden { display: none !important; }
     </style>
 </head>
-<body class="flex min-h-screen">
+<body class="flex">
 
-    <div id="auth-screen" class="fixed inset-0 z-[200] bg-slate-900 flex items-center justify-center p-4">
-        <div class="bg-white p-8 rounded-[2rem] shadow-2xl w-full max-w-md text-center">
-            <div class="w-16 h-16 bg-blue-600 text-white rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg"><i class="fas fa-user-shield text-2xl"></i></div>
-            <h2 class="text-2xl font-black mb-6">منطقة الإدارة</h2>
-            <input type="password" id="pass-input" placeholder="كلمة المرور" class="w-full p-4 bg-slate-100 border-none rounded-xl mb-4 text-center text-xl">
-            <button id="login-btn" class="w-full bg-slate-900 text-white py-4 rounded-xl font-bold hover:bg-blue-600 transition-all">دخول النظام</button>
+    <aside class="w-72 h-screen sticky top-0 bg-slate-900 border-l border-slate-800 p-6 flex flex-col">
+        <div class="mb-10 flex items-center gap-3 px-2">
+            <div class="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center font-black">B</div>
+            <h1 class="text-xl font-black italic uppercase tracking-tighter">BTU <span class="text-blue-500 text-sm italic">Admin</span></h1>
         </div>
-    </div>
-
-    <aside id="main-admin" class="hidden w-72 sidebar text-white flex flex-col p-6 fixed h-full shadow-2xl">
-        <div class="mb-10 text-center">
-            <h1 class="text-2xl font-black italic tracking-tighter">BTU <span class="text-blue-500">SYSTEM</span></h1>
-            <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1">Advanced Control Panel</p>
-        </div>
-        <nav class="space-y-2 flex-1">
-            <div class="bg-blue-600/10 text-blue-500 p-4 rounded-xl flex items-center gap-3 font-bold"><i class="fas fa-users"></i> إدارة الطلاب</div>
-            <div class="text-slate-400 p-4 rounded-xl flex items-center gap-3 font-bold hover:bg-white/5 cursor-pointer"><i class="fas fa-chart-pie"></i> الإحصائيات</div>
-            <div class="text-slate-400 p-4 rounded-xl flex items-center gap-3 font-bold hover:bg-white/5 cursor-pointer"><i class="fas fa-cog"></i> الإعدادات</div>
+        
+        <nav class="flex-1 space-y-1">
+            <div onclick="showSection('students')" class="nav-item active p-4 flex items-center gap-4 font-bold text-sm">
+                <i class="fas fa-users-viewfinder"></i> قاعدة بيانات الطلاب
+            </div>
+            <div onclick="showSection('grades')" class="nav-item p-4 flex items-center gap-4 font-bold text-sm">
+                <i class="fas fa-file-invoice"></i> رفع الدرجات والنتائج
+            </div>
+            <div onclick="showSection('certificates')" class="nav-item p-4 flex items-center gap-4 font-bold text-sm">
+                <i class="fas fa-certificate"></i> إدارة الشهادات والملفات
+            </div>
+            <div onclick="showSection('announcements')" class="nav-item p-4 flex items-center gap-4 font-bold text-sm">
+                <i class="fas fa-bullhorn"></i> إرسال التنبيهات
+            </div>
+            <div class="border-t border-slate-800 my-4 pt-4 text-slate-500 text-[10px] font-black uppercase px-4">الإعدادات</div>
+            <div class="nav-item p-4 flex items-center gap-4 font-bold text-sm text-red-400 hover:bg-red-500/10">
+                <i class="fas fa-sign-out-alt"></i> تسجيل الخروج
+            </div>
         </nav>
-        <div onclick="location.reload()" class="p-4 text-red-400 font-bold flex items-center gap-3 cursor-pointer hover:bg-red-500/10 rounded-xl transition-all"><i class="fas fa-power-off"></i> خروج</div>
     </aside>
 
-    <main id="content-admin" class="hidden flex-1 mr-72 p-8">
-        <div class="max-w-6xl mx-auto">
-            
-            <div class="flex justify-between items-center mb-10 bg-white p-6 rounded-3xl shadow-sm">
-                <div>
-                    <h2 class="text-2xl font-black text-slate-800">قائمة الطلاب الكلية</h2>
-                    <p class="text-slate-400 text-sm font-bold">إدارة وتعديل بيانات الطلاب في السحابة</p>
-                </div>
-                <div class="flex gap-3">
-                    <input type="file" id="excel-uploader" class="hidden" accept=".xlsx, .xls">
-                    <button onclick="document.getElementById('excel-uploader').click()" class="bg-blue-600 text-white px-6 py-3 rounded-xl font-bold flex items-center gap-2 shadow-lg shadow-blue-500/20 hover:scale-105 transition-all"><i class="fas fa-file-excel"></i> استيراد ملف شامل</button>
-                </div>
+    <main class="flex-1 p-8">
+        
+        <div class="grid grid-cols-4 gap-6 mb-10">
+            <div class="glass p-6 rounded-3xl">
+                <p class="text-slate-400 text-xs font-black uppercase mb-2">إجمالي الطلاب</p>
+                <h3 id="total-students" class="text-3xl font-black">0</h3>
             </div>
-
-            <div class="glass-card rounded-[2rem] overflow-hidden shadow-sm">
-                <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-white/50">
-                    <div class="relative w-72">
-                        <i class="fas fa-search absolute left-4 top-4 text-slate-300"></i>
-                        <input type="text" placeholder="بحث باسم الطالب أو الكود..." class="w-full pl-10 pr-4 py-3 bg-white border border-slate-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-500">
-                    </div>
-                    <span id="counter" class="bg-slate-100 text-slate-600 px-4 py-2 rounded-lg text-xs font-black">جاري التحميل...</span>
-                </div>
-                <div class="overflow-x-auto">
-                    <table class="w-full text-right border-collapse">
-                        <thead>
-                            <tr class="bg-slate-50 text-slate-400 text-[11px] font-black uppercase tracking-wider">
-                                <th class="p-5">اسم الطالب</th>
-                                <th class="p-5">الكود الجامعي</th>
-                                <th class="p-5">القسم</th>
-                                <th class="p-5">السنة</th>
-                                <th class="p-5 text-center">الإجراءات</th>
-                            </tr>
-                        </thead>
-                        <tbody id="student-list" class="divide-y divide-slate-50">
-                            </tbody>
-                    </table>
-                </div>
+            <div class="glass p-6 rounded-3xl border-r-4 border-blue-500">
+                <p class="text-slate-400 text-xs font-black uppercase mb-2">درجات مرفوعة</p>
+                <h3 class="text-3xl font-black">0</h3>
+            </div>
+            <div class="glass p-6 rounded-3xl border-r-4 border-green-500">
+                <p class="text-slate-400 text-xs font-black uppercase mb-2">شهادات منجزة</p>
+                <h3 class="text-3xl font-black">0</h3>
+            </div>
+            <div class="glass p-6 rounded-3xl border-r-4 border-orange-500">
+                <p class="text-slate-400 text-xs font-black uppercase mb-2">حالة السيرفر</p>
+                <h3 class="text-sm font-black text-green-500">متصل (Online)</h3>
             </div>
         </div>
+
+        <section id="section-students">
+            <div class="flex justify-between items-end mb-6">
+                <div>
+                    <h2 class="text-3xl font-black italic">قاعدة البيانات الرئيسية</h2>
+                    <p class="text-slate-500 font-bold mt-1">التحكم في بيانات الطلاب الأساسية المستوردة</p>
+                </div>
+                <div class="flex gap-4">
+                    <input type="file" id="main-excel" class="hidden" onchange="uploadMainData(this)">
+                    <button onclick="document.getElementById('main-excel').click()" class="bg-blue-600 hover:bg-blue-700 px-8 py-4 rounded-2xl font-black text-sm transition-all shadow-xl shadow-blue-600/20"><i class="fas fa-plus ml-2"></i> استيراد شيت الطلاب</button>
+                </div>
+            </div>
+            
+            <div class="glass rounded-[2rem] overflow-hidden">
+                <table class="w-full text-right">
+                    <thead class="bg-slate-800 text-slate-400 text-[10px] font-black uppercase tracking-widest">
+                        <tr>
+                            <th class="p-6">الطالب</th>
+                            <th class="p-6">الكود</th>
+                            <th class="p-6">القسم/السنة</th>
+                            <th class="p-6">التواصل</th>
+                            <th class="p-6 text-center">الإجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody id="students-table"></tbody>
+                </table>
+            </div>
+        </section>
+
+        <section id="section-grades" class="hidden">
+            <div class="max-w-2xl bg-white/5 p-10 rounded-[2.5rem] border border-dashed border-slate-700 text-center">
+                <i class="fas fa-file-csv text-6xl text-blue-500 mb-6"></i>
+                <h2 class="text-2xl font-black mb-4">رفع نتائج الامتحانات</h2>
+                <p class="text-slate-400 mb-8">قم برفع ملف الإكسيل الذي يحتوي على كود الطالب والدرجات النهائية لكل مادة</p>
+                <button class="bg-slate-700 px-10 py-4 rounded-xl font-bold">اختيار ملف الدرجات</button>
+            </div>
+        </section>
+
     </main>
 
-    <div id="details-modal" class="hidden fixed inset-0 z-[300] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
-        <div class="bg-white w-full max-w-2xl rounded-[2.5rem] shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-300">
-            <div id="modal-header" class="h-32 bg-slate-900 p-8 flex justify-between items-start">
-                <div class="text-white">
-                    <h2 id="m-name" class="text-2xl font-black">اسم الطالب</h2>
-                    <p id="m-id" class="text-blue-400 font-mono"></p>
+    <div id="student-modal" class="hidden fixed inset-0 z-[100] bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-6 text-slate-900">
+        <div class="bg-white w-full max-w-4xl rounded-[3rem] overflow-hidden flex h-[600px]">
+            <div class="w-1/3 bg-slate-50 p-10 flex flex-col items-center border-l">
+                <div id="m-initials" class="w-24 h-24 bg-blue-600 text-white rounded-3xl flex items-center justify-center text-3xl font-black shadow-xl mb-6">AS</div>
+                <h3 id="m-name" class="text-xl font-black text-center">Name</h3>
+                <p id="m-id" class="text-slate-400 font-mono text-sm mt-2">MK1000</p>
+                <div class="mt-auto w-full space-y-3">
+                    <button class="w-full bg-slate-900 text-white p-4 rounded-2xl font-bold text-sm"><i class="fas fa-edit ml-2"></i> تعديل البيانات</button>
+                    <button onclick="closeModal()" class="w-full bg-slate-200 text-slate-600 p-4 rounded-2xl font-bold text-sm">إغلاق</button>
                 </div>
-                <button onclick="closeModal()" class="text-white/50 hover:text-white"><i class="fas fa-times text-xl"></i></button>
             </div>
-            <div class="p-8 grid grid-cols-2 gap-6">
-                <div class="space-y-4">
-                    <div class="bg-slate-50 p-4 rounded-2xl">
-                        <p class="text-[10px] font-black text-slate-400 uppercase">القسم الدراسي</p>
-                        <p id="m-dept" class="font-bold text-slate-700"></p>
+            <div class="flex-1 p-10 overflow-y-auto">
+                <h4 class="font-black text-lg mb-6 border-b pb-4"><i class="fas fa-folder-open text-blue-500 ml-2"></i> ملفات الطالب والشهادات</h4>
+                <div class="grid grid-cols-2 gap-4 mb-8">
+                    <div class="border-2 border-dashed rounded-3xl p-6 text-center hover:bg-slate-50 cursor-pointer">
+                        <i class="fas fa-shield-alt text-2xl text-slate-300 mb-2"></i>
+                        <p class="text-xs font-black">شهادة التربية العسكرية</p>
+                        <p class="text-[9px] text-slate-400 mt-1 italic">Click to upload PDF</p>
                     </div>
-                    <div class="bg-slate-50 p-4 rounded-2xl">
-                        <p class="text-[10px] font-black text-slate-400 uppercase">السنة الدراسية</p>
-                        <p id="m-year" class="font-bold text-slate-700"></p>
-                    </div>
-                </div>
-                <div class="space-y-4">
-                    <div class="bg-blue-50 p-4 rounded-2xl border border-blue-100">
-                        <p class="text-[10px] font-black text-blue-400 uppercase">رقم الهاتف</p>
-                        <p id="m-phone" class="font-bold text-blue-700"></p>
-                    </div>
-                    <div class="bg-orange-50 p-4 rounded-2xl border border-orange-100">
-                        <p class="text-[10px] font-black text-orange-400 uppercase">هاتف ولي الأمر</p>
-                        <p id="m-p-phone" class="font-bold text-orange-700"></p>
+                    <div class="border-2 border-dashed rounded-3xl p-6 text-center hover:bg-slate-50 cursor-pointer">
+                        <i class="fas fa-id-badge text-2xl text-slate-300 mb-2"></i>
+                        <p class="text-xs font-black">إثبات قيد</p>
+                        <p class="text-[9px] text-slate-400 mt-1 italic">Click to upload PDF</p>
                     </div>
                 </div>
-                <div class="col-span-2 bg-green-50 p-6 rounded-3xl border border-green-100">
-                    <h4 class="font-black text-green-700 mb-4 flex items-center gap-2"><i class="fas fa-plus-circle"></i> إضافة ملاحظات أو نتائج للطلب</h4>
-                    <textarea placeholder="اكتب هنا أي بيانات إضافية تريد أن يراها الطالب..." class="w-full p-4 rounded-xl border-none ring-1 ring-green-200 outline-none focus:ring-2 focus:ring-green-500 h-24 text-sm"></textarea>
-                    <button class="mt-4 bg-green-600 text-white px-6 py-2 rounded-xl font-bold text-sm shadow-md hover:bg-green-700">حفظ التغييرات</button>
+                <h4 class="font-black text-lg mb-4 italic">بيانات التواصل</h4>
+                <div class="bg-blue-50 p-6 rounded-3xl grid grid-cols-2 gap-6">
+                    <div><p class="text-[10px] font-black text-blue-400 uppercase">رقم الطالب</p><p id="m-phone" class="font-bold"></p></div>
+                    <div><p class="text-[10px] font-black text-blue-400 uppercase">رقم ولي الأمر</p><p id="m-p-phone" class="font-bold"></p></div>
                 </div>
             </div>
         </div>
@@ -130,76 +148,65 @@
             databaseURL: "https://btu-portal-default-rtdb.firebaseio.com",
             projectId: "btu-portal"
         };
-
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        // تسجيل الدخول
-        document.getElementById('login-btn').onclick = () => {
-            if(document.getElementById('pass-input').value === "123456") {
-                document.getElementById('auth-screen').classList.add('hidden');
-                document.getElementById('main-admin').classList.remove('hidden');
-                document.getElementById('content-admin').classList.remove('hidden');
-                loadStudents();
-            } else { alert("خطأ!"); }
-        };
+        // تبديل الأقسام في القائمة الجانبية
+        window.showSection = (sectionId) => {
+            document.querySelectorAll('section').forEach(s => s.classList.add('hidden'));
+            document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+            document.getElementById('section-' + sectionId).classList.remove('hidden');
+            event.currentTarget.classList.add('active');
+        }
 
-        // رفع الملف وقراءة "كل شيء"
-        document.getElementById('excel-uploader').onchange = (e) => {
+        // رفع بيانات الطلاب الأساسية
+        window.uploadMainData = (input) => {
             const reader = new FileReader();
-            reader.onload = (ev) => {
-                const data = new Uint8Array(ev.target.result);
+            reader.onload = (e) => {
+                const data = new Uint8Array(e.target.result);
                 const wb = XLSX.read(data, {type: 'array'});
                 const json = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
                 
-                const dataToUpload = {};
+                const upData = {};
                 json.forEach(row => {
                     const id = String(row['University ID'] || '').trim();
-                    if(id) dataToUpload[id] = row; // سيحفظ كل الأعمدة الموجودة في السطر مهما كان عددها
+                    if(id) upData[id] = row;
                 });
-
-                set(ref(db, 'students'), dataToUpload).then(() => alert("تم رفع البيانات كاملة!"));
+                set(ref(db, 'students'), upData).then(() => alert("تم تحديث السحابة بنجاح!"));
             };
-            reader.readAsArrayBuffer(e.target.files[0]);
-        };
-
-        // تحميل وعرض الطلاب
-        function loadStudents() {
-            onValue(ref(db, 'students'), (snap) => {
-                const list = document.getElementById('student-list');
-                const counter = document.getElementById('counter');
-                list.innerHTML = '';
-                if(snap.exists()) {
-                    const data = snap.val();
-                    counter.innerText = `${Object.keys(data).length} طالب مسجل`;
-                    Object.values(data).forEach(s => {
-                        const tr = document.createElement('tr');
-                        tr.className = "student-row transition-all border-b border-slate-50";
-                        tr.innerHTML = `
-                            <td class="p-5 font-bold text-slate-700">${s.Name}</td>
-                            <td class="p-5 font-mono text-blue-600 text-sm">${s['University ID']}</td>
-                            <td class="p-5 text-slate-500 text-sm">${s.Department}</td>
-                            <td class="p-5 text-slate-500 text-sm">${s.Year}</td>
-                            <td class="p-5 text-center"><button class="bg-slate-100 p-2 rounded-lg text-slate-400 hover:text-blue-600"><i class="fas fa-eye"></i></button></td>
-                        `;
-                        tr.onclick = () => openModal(s);
-                        list.appendChild(tr);
-                    });
-                }
-            });
+            reader.readAsArrayBuffer(input.files[0]);
         }
 
-        window.openModal = (student) => {
-            document.getElementById('m-name').innerText = student.Name;
-            document.getElementById('m-id').innerText = student['University ID'];
-            document.getElementById('m-dept').innerText = student.Department;
-            document.getElementById('m-year').innerText = student.Year;
-            document.getElementById('m-phone').innerText = student.Phone || 'غير مسجل';
-            document.getElementById('m-p-phone').innerText = student['Parent Phone'] || 'غير مسجل';
-            document.getElementById('details-modal').classList.remove('hidden');
-        };
+        // عرض الطلاب في الجدول
+        onValue(ref(db, 'students'), (snap) => {
+            const container = document.getElementById('students-table');
+            const total = document.getElementById('total-students');
+            container.innerHTML = '';
+            if(snap.exists()) {
+                const data = snap.val();
+                total.innerText = Object.keys(data).length;
+                Object.values(data).forEach(s => {
+                    container.innerHTML += `
+                        <tr onclick='openModal(${JSON.stringify(s)})' class="hover:bg-slate-800/50 cursor-pointer border-b border-slate-800">
+                            <td class="p-6 font-bold">${s.Name}</td>
+                            <td class="p-6 font-mono text-blue-400">${s['University ID']}</td>
+                            <td class="p-6 text-sm text-slate-400">${s.Department} / ${s.Year}</td>
+                            <td class="p-6 text-xs font-bold text-slate-500">${s.Phone}</td>
+                            <td class="p-6 text-center"><i class="fas fa-chevron-left text-slate-700"></i></td>
+                        </tr>`;
+                });
+            }
+        });
 
-        window.closeModal = () => document.getElementById('details-modal').classList.add('hidden');
+        window.openModal = (s) => {
+            document.getElementById('m-name').innerText = s.Name;
+            document.getElementById('m-id').innerText = s['University ID'];
+            document.getElementById('m-phone').innerText = s.Phone || 'N/A';
+            document.getElementById('m-p-phone').innerText = s['Parent Phone'] || 'N/A';
+            document.getElementById('m-initials').innerText = s.Name[0];
+            document.getElementById('student-modal').classList.remove('hidden');
+        }
+        window.closeModal = () => document.getElementById('student-modal').classList.add('hidden');
     </script>
 </body>
 </html>
