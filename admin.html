@@ -3,32 +3,32 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BTU Admin - Dark Edition</title>
+    <title>BTU Admin - Real Upload System</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap');
-        body { font-family: 'Cairo', sans-serif; background: #0b0f1a; color: #e2e8f0; overflow-x: hidden; }
+        body { font-family: 'Cairo', sans-serif; background: #0b0f1a; color: #e2e8f0; }
         .sidebar { background: #111827; width: 280px; height: 100vh; position: fixed; right: 0; top: 0; border-left: 1px solid #1f2937; }
         .nav-link { color: #94a3b8; transition: 0.2s; cursor: pointer; border-radius: 12px; display: flex; align-items: center; gap: 1rem; padding: 1rem; font-weight: bold; }
-        .nav-link:hover, .nav-link.active { background: #3b82f6; color: white; box-shadow: 0 4px 20px -5px rgba(59, 130, 246, 0.5); }
-        .stat-card { background: #1f2937; border-radius: 24px; padding: 24px; border: 1px solid #374151; transition: 0.3s; }
+        .nav-link.active { background: #3b82f6; color: white; }
+        .main-content { margin-right: 280px; padding: 2rem; width: calc(100% - 280px); }
         .glass-box { background: #111827; border-radius: 2.5rem; border: 1px solid #1f2937; }
         .hidden { display: none !important; }
-        .main-content { margin-right: 280px; padding: 2rem; width: calc(100% - 280px); }
+        .upload-card { border: 2px dashed #374151; transition: 0.3s; cursor: pointer; }
+        .upload-card:hover { border-color: #3b82f6; background: #1e293b; }
+        .loading-pulse { animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .5; } }
     </style>
 </head>
 <body class="flex">
 
-    <div id="auth-screen" class="fixed inset-0 z-[200] bg-[#0b0f1a] flex items-center justify-center p-4">
-        <div class="bg-[#111827] p-10 rounded-[2.5rem] shadow-2xl w-full max-w-md text-center border border-gray-800">
-            <div class="w-20 h-20 bg-blue-600 text-white rounded-[1.5rem] flex items-center justify-center mx-auto mb-6 shadow-lg shadow-blue-500/20">
-                <i class="fas fa-shield-halved text-3xl"></i>
-            </div>
-            <h2 class="text-2xl font-black mb-2 text-white">دخول الإدارة</h2>
-            <input type="password" id="admin-pass" placeholder="Password" class="w-full p-4 bg-[#0b0f1a] border border-gray-800 rounded-2xl mb-4 text-center text-xl tracking-[0.5em] text-blue-400 outline-none focus:border-blue-500 transition-all">
-            <button id="btn-login" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-black text-lg hover:bg-blue-700 transition-all">دخول النظام</button>
+    <div id="auth-screen" class="fixed inset-0 z-[500] bg-[#0b0f1a] flex items-center justify-center p-4">
+        <div class="bg-[#111827] p-10 rounded-[2.5rem] border border-gray-800 w-full max-w-md text-center">
+            <h2 class="text-2xl font-black mb-6 text-white">دخول الإدارة</h2>
+            <input type="password" id="admin-pass" placeholder="Password" class="w-full p-4 bg-[#0b0f1a] border border-gray-800 rounded-2xl mb-4 text-center text-xl text-blue-400 outline-none">
+            <button id="btn-login" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-black text-lg">تحقق ودخول</button>
         </div>
     </div>
 
@@ -40,109 +40,161 @@
             <nav class="space-y-1">
                 <div onclick="showTab('students')" id="link-students" class="nav-link active"><i class="fas fa-users"></i> شؤون الطلاب</div>
                 <div onclick="showTab('grades')" id="link-grades" class="nav-link"><i class="fas fa-file-invoice"></i> رفع الدرجات</div>
-                <div onclick="showTab('certificates')" id="link-certificates" class="nav-link"><i class="fas fa-certificate"></i> إدارة الشهادات</div>
-                <div onclick="showTab('military')" id="link-military" class="nav-link"><i class="fas fa-shield-alt"></i> التربية العسكرية</div>
             </nav>
-            <div class="absolute bottom-8 left-6 right-6 border-t border-gray-800 pt-6">
+            <div class="absolute bottom-8 left-6 right-6 pt-6 border-t border-gray-800">
                 <div onclick="location.reload()" class="nav-link text-red-500 hover:bg-red-500/10"><i class="fas fa-power-off"></i> تسجيل الخروج</div>
             </div>
         </aside>
 
         <main class="main-content">
             <header class="flex justify-between items-center mb-10">
-                <div><h2 id="tab-title" class="text-3xl font-black text-white italic">شؤون الطلاب</h2><p class="text-gray-500 font-bold italic">Management Portal</p></div>
-                <input type="file" id="main-excel" class="hidden" onchange="handleExcel(this, 'students')">
-                <button id="main-upload-btn" onclick="document.getElementById('main-excel').click()" class="bg-blue-600 text-white px-8 py-4 rounded-2xl font-black text-sm flex items-center gap-3 hover:bg-blue-500 shadow-xl transition-all">
-                    <i class="fas fa-file-excel text-lg"></i> استيراد شيت الطلاب
+                <h2 id="tab-title" class="text-3xl font-black text-white italic">قاعدة البيانات</h2>
+                <button onclick="document.getElementById('import-excel').click()" class="bg-blue-600 px-8 py-4 rounded-2xl font-black text-sm flex items-center gap-2">
+                    <i class="fas fa-plus"></i> استيراد شيت الطلاب
                 </button>
+                <input type="file" id="import-excel" class="hidden" onchange="uploadMainExcel(this)">
             </header>
 
             <div id="content-box" class="glass-box p-8 min-h-[500px]">
                 <div id="view-students">
                     <table class="w-full text-right">
-                        <thead><tr class="text-gray-500 text-[10px] font-black uppercase border-b border-gray-800"><th class="pb-6">الاسم</th><th class="pb-6 text-center">الكود</th><th class="pb-6">القسم</th><th class="pb-6 text-center">الإجراءات</th></tr></thead>
+                        <thead><tr class="text-gray-500 text-[10px] font-black border-b border-gray-800"><th class="pb-6">الاسم</th><th class="pb-6 text-center">الكود</th><th class="pb-6">القسم</th><th class="pb-6 text-center">الحالة</th></tr></thead>
                         <tbody id="rows-output" class="divide-y divide-gray-800"></tbody>
                     </table>
                 </div>
 
-                <div id="view-upload-center" class="hidden flex flex-col items-center justify-center py-24">
-                    <div class="w-24 h-24 bg-blue-500/10 rounded-full flex items-center justify-center mb-6">
-                        <i id="center-icon" class="fas fa-upload text-4xl text-blue-500"></i>
-                    </div>
-                    <h3 id="center-title" class="text-2xl font-black mb-2"></h3>
-                    <p id="center-desc" class="text-gray-500 mb-8 font-bold italic">قم برفع ملف الإكسيل الخاص بهذا القسم لتحديث بيانات السحابة</p>
-                    <button id="center-btn" class="bg-blue-600 px-12 py-5 rounded-2xl font-black shadow-lg hover:scale-105 transition-all"></button>
+                <div id="view-grades" class="hidden flex flex-col items-center justify-center py-20">
+                    <i class="fas fa-cloud-upload-alt text-6xl text-blue-500 mb-6"></i>
+                    <h3 class="text-2xl font-black mb-4">رفع شيت الدرجات الموحد</h3>
+                    <button onclick="document.getElementById('grades-file').click()" class="bg-blue-600 px-12 py-4 rounded-2xl font-black shadow-xl">اختر ملف Excel للدرجات</button>
+                    <input type="file" id="grades-file" class="hidden" onchange="uploadGradesExcel(this)">
                 </div>
             </div>
         </main>
     </div>
 
+    <div id="modal" class="hidden fixed inset-0 z-[300] bg-black/90 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-[#111827] w-full max-w-4xl rounded-[3rem] flex h-[600px] border border-gray-800 overflow-hidden">
+            <div class="w-80 bg-[#0b0f1a] p-10 flex flex-col items-center border-l border-gray-800">
+                <div id="m-char" class="w-20 h-20 bg-blue-600 text-white rounded-3xl flex items-center justify-center text-3xl font-black mb-6"></div>
+                <h3 id="m-name" class="text-xl font-black text-center text-white"></h3>
+                <p id="m-id" class="text-blue-500 font-bold mt-2 font-mono"></p>
+                <button onclick="document.getElementById('modal').classList.add('hidden')" class="mt-auto w-full bg-gray-800 text-white p-4 rounded-2xl font-black">إغلاق</button>
+            </div>
+            <div class="flex-1 p-12">
+                <h4 class="text-2xl font-black mb-8 text-white italic">إدارة ملفات الطالب</h4>
+                <div onclick="triggerMilitaryUpload()" id="mil-zone" class="upload-card rounded-[2.5rem] p-12 text-center">
+                    <i class="fas fa-shield-alt text-4xl text-gray-600 mb-4"></i>
+                    <p class="font-black text-gray-300">رفع شهادة التربية العسكرية (PDF)</p>
+                    <p id="mil-status" class="text-[10px] text-blue-500 mt-2 font-bold uppercase italic">اضغط لاختيار الملف</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js";
-        import { getDatabase, ref, set, onValue, update } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-database.js";
+        import { getDatabase, ref, onValue, update } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-database.js";
+        import { getStorage, ref as sRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-storage.js";
 
-        const firebaseConfig = { apiKey: "AIzaSyBwg2LRk5wbTMuYNoqoP3Pd5zlOvgXBEIY", authDomain: "btu-portal.firebaseapp.com", databaseURL: "https://btu-portal-default-rtdb.firebaseio.com", projectId: "btu-portal" };
+        const firebaseConfig = { apiKey: "AIzaSyBwg2LRk5wbTMuYNoqoP3Pd5zlOvgXBEIY", authDomain: "btu-portal.firebaseapp.com", databaseURL: "https://btu-portal-default-rtdb.firebaseio.com", projectId: "btu-portal", storageBucket: "btu-portal.appspot.com" };
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
+        const storage = getStorage(app);
 
+        let activeId = null;
+
+        // الدخول
         document.getElementById('btn-login').onclick = () => {
             if(document.getElementById('admin-pass').value === "29112006") {
                 document.getElementById('auth-screen').classList.add('hidden');
                 document.getElementById('admin-system').classList.remove('hidden');
-            } else { alert("خطأ!"); }
-        };
-
-        window.showTab = (tab) => {
-            document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
-            document.getElementById('link-' + tab).classList.add('active');
-            
-            const vStudents = document.getElementById('view-students');
-            const vUpload = document.getElementById('view-upload-center');
-            const mainBtn = document.getElementById('main-upload-btn');
-            
-            if(tab === 'students') {
-                vStudents.classList.remove('hidden'); vUpload.classList.add('hidden');
-                mainBtn.classList.remove('hidden');
-                document.getElementById('tab-title').innerText = "شؤون الطلاب";
-            } else {
-                vStudents.classList.add('hidden'); vUpload.classList.remove('hidden');
-                mainBtn.classList.add('hidden');
-                const config = {
-                    grades: { title: "رفع الدرجات", btn: "رفع شيت الدرجات", icon: "fa-file-invoice" },
-                    certificates: { title: "إدارة الشهادات", btn: "رفع شيت الشهادات", icon: "fa-certificate" },
-                    military: { title: "التربية العسكرية", btn: "رفع شيت التربية العسكرية", icon: "fa-shield-alt" }
-                };
-                document.getElementById('tab-title').innerText = config[tab].title;
-                document.getElementById('center-title').innerText = config[tab].title;
-                document.getElementById('center-btn').innerText = config[tab].btn;
-                document.getElementById('center-icon').className = `fas ${config[tab].icon} text-4xl text-blue-500`;
-                document.getElementById('center-btn').onclick = () => document.getElementById('main-excel').click();
             }
         };
 
-        window.handleExcel = (input, type) => {
+        // التبديل بين التبويبات
+        window.showTab = (tab) => {
+            document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+            document.getElementById('link-' + tab).classList.add('active');
+            document.getElementById('view-students').classList.toggle('hidden', tab !== 'students');
+            document.getElementById('view-grades').classList.toggle('hidden', tab !== 'grades');
+        };
+
+        // رفع شيت الدرجات (للجميع)
+        window.uploadGradesExcel = (input) => {
             const reader = new FileReader();
             reader.onload = (e) => {
                 const data = new Uint8Array(e.target.result);
                 const wb = XLSX.read(data, {type: 'array'});
                 const json = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
-                const up = {};
-                json.forEach(row => { if(row['University ID']) up[row['University ID']] = row; });
-                update(ref(db, 'students'), up).then(() => alert("تم التحديث بنجاح!"));
+                const updates = {};
+                json.forEach(row => {
+                    const id = String(row['University ID']).trim();
+                    if(id) updates[`students/${id}/grades`] = row; // بيحط الدرجات جوه بيانات كل طالب
+                });
+                update(ref(db), updates).then(() => alert("تم رفع واعتماد الدرجات لجميع الطلاب بنجاح!"));
             };
             reader.readAsArrayBuffer(input.files[0]);
         };
 
+        // رفع شهادة التربية العسكرية (لطالب محدد)
+        window.triggerMilitaryUpload = () => {
+            const fileInput = document.createElement('input');
+            fileInput.type = 'file';
+            fileInput.accept = 'application/pdf';
+            fileInput.onchange = async (e) => {
+                const file = e.target.files[0];
+                if(!file || !activeId) return;
+
+                const zone = document.getElementById('mil-zone');
+                const status = document.getElementById('mil-status');
+
+                zone.classList.add('loading-pulse');
+                status.innerText = "جاري الرفع الفعلي...";
+
+                try {
+                    const storageRef = sRef(storage, `military/${activeId}.pdf`);
+                    await uploadBytes(storageRef, file);
+                    const url = await getDownloadURL(storageRef);
+
+                    // حفظ الرابط في الداتابيز
+                    await update(ref(db, `students/${activeId}`), { 
+                        military_cert: url,
+                        military_status: "مكتمل" 
+                    });
+
+                    zone.classList.remove('loading-pulse');
+                    status.innerText = "تم الرفع بنجاح ✅";
+                    alert("تمت العملية! الملف متاح الآن في حساب الطالب.");
+                } catch (err) {
+                    alert("فشل الرفع، تأكد من إعدادات Storage");
+                    zone.classList.remove('loading-pulse');
+                }
+            };
+            fileInput.click();
+        };
+
+        // جلب وعرض الطلاب
         onValue(ref(db, 'students'), (snap) => {
             const out = document.getElementById('rows-output');
             out.innerHTML = '';
-            if(snap.exists()) {
+            if(snap.exists()){
                 Object.values(snap.val()).forEach(s => {
-                    out.innerHTML += `<tr class="hover:bg-gray-800/50 cursor-pointer border-b border-gray-800">
-                        <td class="py-6 font-black text-white">${s.Name}</td>
-                        <td class="py-6 text-center font-mono text-blue-400 font-bold italic">${s['University ID']}</td>
+                    const tr = document.createElement('tr');
+                    tr.className = "hover:bg-gray-800/40 cursor-pointer border-b border-gray-800";
+                    tr.innerHTML = `<td class="py-6 font-black text-white">${s.Name}</td>
+                        <td class="py-6 text-center font-mono text-blue-400 font-bold">${s['University ID']}</td>
                         <td class="py-6 font-bold text-gray-500">${s.Department}</td>
-                        <td class="py-6 text-center"><i class="fas fa-cog text-gray-700"></i></td></tr>`;
+                        <td class="py-6 text-center"><span class="px-3 py-1 rounded-full text-[10px] bg-blue-500/10 text-blue-500 font-black">${s.military_status || 'قيد الانتظار'}</span></td>`;
+                    tr.onclick = () => {
+                        activeId = s['University ID'];
+                        document.getElementById('m-name').innerText = s.Name;
+                        document.getElementById('m-id').innerText = s['University ID'];
+                        document.getElementById('m-char').innerText = s.Name[0];
+                        document.getElementById('mil-status').innerText = s.military_cert ? "مرفوع بالفعل (اضغط للتحديث)" : "اضغط لاختيار الملف";
+                        document.getElementById('modal').classList.remove('hidden');
+                    };
+                    out.appendChild(tr);
                 });
             }
         });
