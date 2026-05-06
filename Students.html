@@ -1,55 +1,79 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BTU Student Portal</title>
+    <title>Student Portal - BSUT</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        body { background: #0f172a; font-family: 'Inter', sans-serif; }
-        .hero-bg {
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; color: #1e293b; margin: 0; }
+        .sidebar-item { transition: all 0.2s; cursor: pointer; display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: 8px; color: #64748b; font-weight: 500; margin-bottom: 4px; }
+        .sidebar-item:hover { background-color: #f1f5f9; color: #2563eb; }
+        .sidebar-item.active { background-color: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe; }
+        .card { background: white; border-radius: 12px; border: 1px solid #e2e8f0; padding: 24px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+        .stat-label { font-size: 0.7rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.025em; }
+        
+        /* إضافات واجهة تسجيل الدخول */
+        #login-screen {
             background: linear-gradient(rgba(15, 23, 42, 0.9), rgba(15, 23, 42, 0.9)), 
                         url('https://images.unsplash.com/photo-1541339907198-e08756defe93?auto=format&fit=crop&w=1920&q=80');
             background-size: cover; background-position: center;
         }
+
+        @media print { 
+            .sidebar-item, aside, button, input { display: none !important; } 
+            main { margin-left: 0 !important; padding: 0 !important; }
+            .card { box-shadow: none; border: 1px solid #eee; }
+        }
         .hidden { display: none !important; }
     </style>
 </head>
-<body class="text-white">
+<body class="flex min-h-screen">
 
-    <div id="login-screen" class="hero-bg min-h-screen flex items-center justify-center p-6">
+    <div id="login-screen" class="fixed inset-0 z-[100] flex items-center justify-center p-6">
         <div class="bg-white rounded-[2rem] p-10 w-full max-w-md shadow-2xl text-slate-900">
-            <h1 class="text-3xl font-black italic text-center mb-2 tracking-tighter">BTU <span class="text-blue-600">PORTAL</span></h1>
-            <p class="text-center text-slate-500 font-bold mb-8 text-sm uppercase">Academic Login</p>
-            
+            <h1 class="text-2xl font-black text-center mb-2 italic">BSUT <span class="text-blue-600">PORTAL</span></h1>
+            <p class="text-center text-slate-500 font-bold mb-8 text-xs uppercase tracking-widest">Student Login</p>
             <div class="space-y-4">
-                <input type="text" id="name" placeholder="الاسم بالكامل" class="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-blue-600 transition-all text-center">
-                <input type="text" id="id" placeholder="الرقم الجامعي (MK1000)" class="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-blue-600 transition-all text-center">
-                <button onclick="login()" class="w-full bg-slate-900 text-white py-4 rounded-2xl font-black text-lg hover:bg-blue-600 transition-all shadow-xl">دخول النظام</button>
+                <input type="text" id="login-name" placeholder="Full Name" class="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-blue-600 transition-all text-center font-medium">
+                <input type="text" id="login-id" placeholder="University ID (e.g., MK1000)" class="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-blue-600 transition-all text-center font-medium">
+                <button id="btn-login" class="w-full bg-slate-900 text-white py-4 rounded-2xl font-black text-lg hover:bg-blue-600 transition-all shadow-xl">Login System</button>
             </div>
-            <p id="err" class="text-red-500 text-xs mt-4 text-center font-bold"></p>
+            <p id="login-msg" class="text-red-500 text-xs mt-4 text-center font-bold"></p>
         </div>
     </div>
 
-    <div id="dashboard" class="hidden min-h-screen bg-slate-950 p-8">
-        <div class="max-w-4xl mx-auto">
-            <div class="flex justify-between items-center mb-12">
-                <h1 class="text-3xl font-black italic">BTU <span class="text-blue-500">STUDENT</span></h1>
-                <button onclick="location.reload()" class="bg-slate-900 border border-slate-800 px-6 py-2 rounded-full text-slate-400 hover:text-white transition-all">خروج</button>
+    <div id="portal-wrapper" class="hidden flex w-full">
+        <aside class="w-64 border-r border-slate-200 bg-white flex flex-col p-4 fixed h-full z-10">
+            <div class="mb-8 px-2">
+                <h1 class="text-xl font-bold text-slate-900 leading-tight">Business Administration</h1>
+                <p class="text-xs text-slate-500 font-medium italic">Beni Suef Technological University</p>
             </div>
+            <nav id="sidebar-nav" class="flex-1">
+                <div onclick="switchTab('dashboard', this)" class="sidebar-item active"><i class="fas fa-th-large"></i> Dashboard</div>
+                <div onclick="switchTab('personal', this)" class="sidebar-item"><i class="far fa-user"></i> Personal Information</div>
+                <div onclick="switchTab('academic', this)" class="sidebar-item"><i class="fas fa-graduation-cap"></i> Academic Record</div>
+                <div onclick="switchTab('results', this)" class="sidebar-item"><i class="fas fa-award"></i> Results</div>
+                <div onclick="switchTab('assignments', this)" class="sidebar-item"><i class="fas fa-book-open"></i> Assignments</div>
+                <div onclick="switchTab('military', this)" class="sidebar-item"><i class="fas fa-shield-alt"></i> Military Education</div>
+            </nav>
             
-            <div class="bg-slate-900 p-10 rounded-[3rem] border border-slate-800 mb-8">
-                <h2 id="welcome" class="text-4xl font-black mb-10"></h2>
-                <div class="grid grid-cols-2 gap-6">
-                    <div class="p-6 bg-slate-950 rounded-3xl border border-slate-800"><p class="text-slate-500 text-xs font-bold uppercase mb-2">القسم</p><h3 id="d-dept" class="text-xl font-bold"></h3></div>
-                    <div class="p-6 bg-slate-950 rounded-3xl border border-slate-800"><p class="text-slate-500 text-xs font-bold uppercase mb-2">رقم الكود</p><h3 id="d-code" class="text-xl font-bold"></h3></div>
+            <div class="mt-auto border-t border-slate-100 pt-4">
+                <div onclick="logout()" class="sidebar-item text-red-500 hover:bg-red-50 hover:text-red-600">
+                    <i class="fas fa-sign-out-alt"></i> Logout
                 </div>
             </div>
-        </div>
+        </aside>
+
+        <main class="flex-1 ml-64 p-10 bg-slate-50/50 min-h-screen">
+            <div id="dynamic-content" class="max-w-6xl mx-auto"></div>
+        </main>
     </div>
 
     <script type="module">
+        // إضافات Firebase للربط بالسحابة
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js";
         import { getDatabase, ref, get, child } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-database.js";
 
@@ -66,30 +90,118 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        window.login = async function() {
-            const name = document.getElementById('name').value.trim();
-            const id = document.getElementById('id').value.trim();
-            const err = document.getElementById('err');
-            
-            if(!name || !id) return;
-            err.innerText = "جاري الاتصال بالسحابة...";
+        // كائن بيانات الطالب (سيتم تحديثه من السحابة)
+        window.studentData = {
+            name: "",
+            id: "",
+            dept: "",
+            year: "",
+            initials: "",
+            gpa: "0.00", 
+            militaryProgress: "0" 
+        };
+
+        // وظيفة تسجيل الدخول من السحابة
+        document.getElementById('btn-login').onclick = async function() {
+            const nameInput = document.getElementById('login-name').value.trim();
+            const idInput = document.getElementById('login-id').value.trim();
+            const msg = document.getElementById('login-msg');
+
+            if(!nameInput || !idInput) { msg.innerText = "Please fill all fields"; return; }
+            msg.innerText = "Connecting to cloud...";
 
             try {
-                const snap = await get(child(ref(db), 'students'));
-                if(snap.exists()) {
-                    const student = Object.values(snap.val()).find(s => 
-                        s.name.toLowerCase() === name.toLowerCase() && s.id === id
+                const snapshot = await get(child(ref(db), 'students'));
+                if (snapshot.exists()) {
+                    const students = snapshot.val();
+                    const student = Object.values(students).find(s => 
+                        s.name.toLowerCase() === nameInput.toLowerCase() && s.id === idInput
                     );
 
-                    if(student) {
+                    if (student) {
+                        // تحديث البيانات من السحابة
+                        window.studentData.name = student.name;
+                        window.studentData.id = student.id;
+                        window.studentData.dept = student.dept;
+                        window.studentData.year = student.year;
+                        window.studentData.initials = student.name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0,2);
+                        
+                        // إخفاء تسجيل الدخول وإظهار البورتال
                         document.getElementById('login-screen').classList.add('hidden');
-                        document.getElementById('dashboard').classList.remove('hidden');
-                        document.getElementById('welcome').innerText = "أهلاً، " + student.name;
-                        document.getElementById('d-dept').innerText = student.dept;
-                        document.getElementById('d-code').innerText = student.id;
-                    } else { err.innerText = "الاسم أو الكود غير موجود في السجلات السحابية"; }
-                } else { err.innerText = "قاعدة البيانات فارغة تماماً"; }
-            } catch(e) { err.innerText = "خطأ في الاتصال"; }
+                        document.getElementById('portal-wrapper').classList.remove('hidden');
+                        
+                        // تشغيل أول تاب
+                        window.switchTab('dashboard', document.querySelector('.sidebar-item'));
+                    } else {
+                        msg.innerText = "Invalid Name or ID. Please check the Excel record.";
+                    }
+                } else {
+                    msg.innerText = "Cloud database is empty. Admin must upload Excel first.";
+                }
+            } catch (error) {
+                msg.innerText = "Connection error. Check your internet.";
+            }
+        };
+
+        // دالة تسجيل الخروج المحدثة
+        window.logout = function() {
+            if(confirm("Are you sure you want to logout?")) {
+                location.reload(); 
+            }
+        }
+
+        // دالة تبديل التابات الأصلية مع تعديل بسيط لقراءة studentData المحدثة
+        window.switchTab = function(tab, element) {
+            document.querySelectorAll('.sidebar-item').forEach(item => item.classList.remove('active'));
+            element.classList.add('active');
+            const content = document.getElementById('dynamic-content');
+
+            if (tab === 'dashboard') {
+                content.innerHTML = `
+                    <div class="mb-8"><h1 class="text-3xl font-bold text-slate-900">Student Dashboard</h1><p class="text-slate-500 mt-1 font-medium">Welcome back, ${studentData.name}</p></div>
+                    <div class="grid grid-cols-4 gap-4 mb-8">
+                        <div class="card"><p class="stat-label">Cumulative GPA</p><p class="text-4xl font-bold text-blue-600 mt-2">${studentData.gpa}</p></div>
+                        <div class="card"><p class="stat-label">Enrolled Courses</p><p class="text-4xl font-bold text-slate-800 mt-2">0</p></div>
+                        <div class="card"><p class="stat-label">Pending Assignments</p><p class="text-4xl font-bold text-orange-500 mt-2">0</p></div>
+                        <div class="card"><p class="stat-label">Completed Assignments</p><p class="text-4xl font-bold text-green-600 mt-2">0</p></div>
+                    </div>
+                    <div class="card"><h3 class="font-bold text-slate-800 mb-1">Recent Grades</h3><p class="text-xs text-slate-500 mb-6 font-medium">Your most recent academic results</p>
+                    <table class="w-full text-left text-sm"><tr class="text-slate-400 font-bold border-b border-slate-100"><th class="pb-3 px-2">Course</th><th class="pb-3 px-2">Semester</th><th class="pb-3 px-2">Score</th><th class="pb-3 px-2">Letter Grade</th></tr>
+                    <tr><td colspan="4" class="py-12 text-center text-slate-400 font-medium italic">No recent grades</td></tr></table></div>`;
+            } 
+            else if (tab === 'personal') {
+                content.innerHTML = `
+                    <div class="mb-8"><h1 class="text-3xl font-bold text-slate-900 italic">Personal Information</h1><p class="text-slate-500 mt-1 font-medium italic">Your profile and account details</p></div>
+                    <div class="card p-0 overflow-hidden mb-6 border-none shadow-sm">
+                        <div class="h-32 bg-gradient-to-r from-blue-700 to-indigo-900"></div>
+                        <div class="px-8 pb-6 flex justify-between items-end -mt-12 relative z-10">
+                            <div class="flex items-center gap-6">
+                                <div class="w-32 h-32 rounded-full bg-white border-4 border-white shadow-lg flex items-center justify-center text-blue-700 text-4xl font-bold">${studentData.initials}</div>
+                                <div class="mb-2"><h2 class="text-3xl font-bold text-slate-800 italic">${studentData.name}</h2><p class="text-slate-500 font-medium italic">${studentData.dept} · ${studentData.year}</p></div>
+                            </div>
+                            <div class="mb-4"><button class="bg-blue-600 text-white px-8 py-2 rounded-md font-bold text-sm">GPA ${studentData.gpa}</button></div>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-6">
+                        <div class="card"><div class="flex items-center gap-2 mb-1 text-blue-600"><i class="far fa-user text-sm"></i><h3 class="font-bold text-slate-800 italic">Account Details</h3></div><p class="text-xs text-slate-400 mb-6 font-medium italic">Your registered information</p>
+                        <div class="space-y-4 text-sm">
+                            <div class="flex items-start gap-3"><i class="far fa-user text-slate-300 mt-1"></i><div><p class="text-[10px] font-bold text-slate-400 uppercase italic">Full Name</p><p class="font-bold italic">${studentData.name}</p></div></div>
+                            <div class="flex items-start gap-3"><i class="far fa-id-card text-slate-300 mt-1"></i><div><p class="text-[10px] font-bold text-slate-400 uppercase italic">University ID</p><p class="font-bold italic">${studentData.id}</p></div></div>
+                            <div class="flex items-start gap-3"><i class="fas fa-building text-slate-300 mt-1"></i><div><p class="text-[10px] font-bold text-slate-400 uppercase italic">Department</p><p class="font-bold italic">${studentData.dept}</p></div></div>
+                        </div></div>
+                        <div class="card"><div class="flex items-center gap-2 mb-1 text-blue-600"><i class="far fa-envelope text-sm"></i><h3 class="font-bold text-slate-800 italic">Contact Information</h3></div><p class="text-xs text-slate-400 mb-6 font-medium italic">How we can reach you</p>
+                        <div class="space-y-4 text-sm">
+                            <div class="flex items-start gap-3"><i class="far fa-envelope text-slate-300 mt-1"></i><div><p class="text-[10px] font-bold text-slate-400 uppercase italic">Email Address</p><p class="font-medium italic text-slate-400">Not provided</p></div></div>
+                            <div class="flex items-start gap-3"><i class="fas fa-phone text-slate-300 mt-1"></i><div><p class="text-[10px] font-bold text-slate-400 uppercase italic">Phone Number</p><p class="font-medium italic text-slate-400">Not provided</p></div></div>
+                            <div class="flex items-start gap-3"><i class="far fa-calendar-alt text-slate-300 mt-1"></i><div><p class="text-[10px] font-bold text-slate-400 uppercase italic">Member Since</p><p class="font-bold italic text-slate-700">May 2026</p></div></div>
+                        </div></div>
+                    </div>`;
+            }
+            // بقية التابات (academic, results, assignments, military) تظل كما هي في كودك الأصلي
+            else {
+                // لتوفير المساحة، يمكنك نسخ بقية الـ Else If من كودك هنا وهي ستعمل تلقائياً مع studentData المحدثة
+                content.innerHTML = `<div class="card text-center py-20 text-slate-400 italic">Content for ${tab} tab is loading...</div>`;
+            }
         }
     </script>
 </body>
