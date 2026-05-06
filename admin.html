@@ -3,61 +3,72 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BTU - Admin Control</title>
+    <title>BTU - Admin Control Panel</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        body { background-color: #0f172a; font-family: 'Inter', sans-serif; color: white; }
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap');
+        body { font-family: 'Cairo', sans-serif; background-color: #0f172a; color: white; }
         .hidden { display: none !important; }
     </style>
 </head>
-<body class="p-4 md:p-8">
+<body class="p-4">
 
-    <div id="admin-lock" class="min-h-screen flex items-center justify-center">
-        <div class="bg-slate-800 p-8 rounded-3xl border border-slate-700 shadow-2xl w-full max-w-md text-center">
-            <i class="fas fa-user-shield text-5xl text-blue-500 mb-6"></i>
-            <h2 class="text-2xl font-bold mb-6">لوحة تحكم المسؤول</h2>
-            <input type="password" id="admin-pass" placeholder="أدخل كلمة المرور" class="w-full p-4 rounded-xl bg-slate-900 border border-slate-700 mb-4 outline-none focus:ring-2 focus:ring-blue-500 text-center">
-            <button onclick="checkPass()" class="w-full bg-blue-600 py-4 rounded-xl font-bold hover:bg-blue-700 transition-all">دخول</button>
+    <div id="auth-screen" class="min-h-screen flex items-center justify-center">
+        <div class="bg-slate-800 p-10 rounded-[2rem] border border-slate-700 shadow-2xl w-full max-w-md text-center">
+            <div class="w-20 h-20 bg-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-blue-500/20">
+                <i class="fas fa-lock text-3xl"></i>
+            </div>
+            <h2 class="text-2xl font-black mb-2">دخول المسؤول</h2>
+            <p class="text-slate-400 text-sm mb-8">يرجى إدخال كلمة المرور للإدارة</p>
+            <input type="password" id="pass-input" placeholder="••••••••" class="w-full p-4 rounded-xl bg-slate-900 border border-slate-700 mb-4 outline-none focus:ring-2 focus:ring-blue-500 text-center text-xl tracking-widest">
+            <button id="login-btn" class="w-full bg-blue-600 py-4 rounded-xl font-bold hover:bg-blue-700 transition-all active:scale-95 shadow-xl">تحقق ودخول</button>
         </div>
     </div>
 
-    <div id="admin-content" class="hidden max-w-6xl mx-auto">
-        <div class="flex justify-between items-center mb-10 bg-slate-800 p-6 rounded-2xl border border-slate-700">
+    <div id="admin-dashboard" class="hidden max-w-6xl mx-auto py-10">
+        <div class="flex flex-col md:flex-row justify-between items-center mb-10 gap-6 bg-slate-800 p-8 rounded-3xl border border-slate-700 shadow-xl">
             <div>
-                <h1 class="text-3xl font-black italic text-blue-500">BTU <span class="text-white">ADMIN</span></h1>
-                <p class="text-slate-400 text-xs mt-1 uppercase tracking-widest">Cloud Database System</p>
+                <h1 class="text-3xl font-black italic tracking-tighter">BTU <span class="text-blue-500">ADMIN</span> CONTROL</h1>
+                <p class="text-slate-400 text-xs mt-1 font-bold uppercase tracking-[0.2em]">Cloud Management System</p>
             </div>
-            <div id="cloud-status" class="bg-red-500/10 text-red-500 border border-red-500/20 px-4 py-2 rounded-full text-xs font-bold uppercase">OFFLINE</div>
+            <div id="cloud-status" class="flex items-center gap-3 bg-red-500/10 text-red-500 border border-red-500/20 px-6 py-2 rounded-full text-xs font-black uppercase">
+                <span class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span> Offline
+            </div>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <div class="md:col-span-1 bg-slate-800 p-8 rounded-3xl border border-slate-700 text-center">
-                <input type="file" id="excel-file" class="hidden" accept=".xlsx, .xls, .csv">
-                <div onclick="document.getElementById('excel-file').click()" class="cursor-pointer border-2 border-dashed border-slate-600 rounded-2xl p-8 hover:border-blue-500 transition-all bg-slate-900/50">
-                    <i class="fas fa-cloud-upload-alt text-4xl text-blue-400 mb-4"></i>
-                    <h3 class="font-bold">ارفع ملف الإكسيل</h3>
-                    <p class="text-slate-500 text-xs mt-2">قم باختيار ملف الطلاب الجديد</p>
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div class="lg:col-span-1">
+                <div class="bg-slate-800 rounded-[2rem] border border-slate-700 p-8 sticky top-8 shadow-2xl">
+                    <h3 class="font-black text-xl mb-6 flex items-center gap-3"><i class="fas fa-file-upload text-blue-500"></i> تحديث البيانات</h3>
+                    <input type="file" id="excel-uploader" class="hidden" accept=".xlsx, .xls, .csv">
+                    <div onclick="document.getElementById('excel-uploader').click()" class="cursor-pointer border-2 border-dashed border-slate-600 rounded-2xl p-10 hover:border-blue-500 transition-all bg-slate-900/50 text-center group">
+                        <i class="fas fa-cloud-upload-alt text-5xl text-slate-500 group-hover:text-blue-500 mb-4 transition-colors"></i>
+                        <p class="font-bold text-sm">اختر ملف الإكسيل</p>
+                        <p class="text-slate-500 text-[10px] mt-2">سيتم رفع كافة الحقول (ID, Name, Dept, Year)</p>
+                    </div>
                 </div>
             </div>
-            
-            <div class="md:col-span-2 bg-slate-800 rounded-3xl border border-slate-700 overflow-hidden">
-                <div class="p-5 bg-slate-900/50 flex justify-between items-center border-b border-slate-700">
-                    <span class="font-bold"><i class="fas fa-database ml-2"></i>الطلاب في السحابة</span>
-                    <span id="student-count" class="bg-blue-600 px-3 py-1 rounded-full text-xs font-bold">0</span>
-                </div>
-                <div class="max-h-[400px] overflow-y-auto">
-                    <table class="w-full text-right">
-                        <thead class="sticky top-0 bg-slate-900 text-slate-500 text-[10px] uppercase">
-                            <tr>
-                                <th class="p-4">الاسم</th>
-                                <th class="p-4">الكود الجامعي</th>
-                                <th class="p-4">الحالة</th>
-                            </tr>
-                        </thead>
-                        <tbody id="data-preview" class="divide-y divide-slate-700/50 text-sm"></tbody>
-                    </table>
+
+            <div class="lg:col-span-2">
+                <div class="bg-slate-800 rounded-[2rem] border border-slate-700 overflow-hidden shadow-2xl">
+                    <div class="p-6 bg-slate-900/50 border-b border-slate-700 flex justify-between items-center">
+                        <span class="font-black text-lg">الطلاب في السحابة</span>
+                        <span id="counter" class="bg-blue-600 text-[10px] font-black px-4 py-1 rounded-full">0 طالب</span>
+                    </div>
+                    <div class="max-h-[600px] overflow-y-auto">
+                        <table class="w-full text-right text-sm">
+                            <thead class="sticky top-0 bg-slate-900 text-slate-500 text-[10px] font-black uppercase">
+                                <tr>
+                                    <th class="p-5">الاسم</th>
+                                    <th class="p-5 text-center">الكود</th>
+                                    <th class="p-5 text-center">الحالة</th>
+                                </tr>
+                            </thead>
+                            <tbody id="preview-list" class="divide-y divide-slate-700/50"></tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
@@ -67,6 +78,7 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js";
         import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-database.js";
 
+        // إعدادات Firebase الخاصة بمشروعك
         const firebaseConfig = {
             apiKey: "AIzaSyBwg2LRk5wbTMuYNoqoP3Pd5zlOvgXBEIY",
             authDomain: "btu-portal.firebaseapp.com",
@@ -80,66 +92,71 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        // التحقق من كلمة السر
-        window.checkPass = function() {
-            const pass = document.getElementById('admin-pass').value;
-            if(pass === "123456") { // يمكنك تغيير كلمة السر هنا
-                document.getElementById('admin-lock').classList.add('hidden');
-                document.getElementById('admin-content').classList.remove('hidden');
-                loadCloudData();
-            } else { alert("كلمة السر خطأ!"); }
+        // وظيفة تسجيل الدخول
+        document.getElementById('login-btn').onclick = () => {
+            const pass = document.getElementById('pass-input').value;
+            if (pass === "123456") {
+                document.getElementById('auth-screen').classList.add('hidden');
+                document.getElementById('admin-dashboard').classList.remove('hidden');
+                syncData();
+            } else { alert("كلمة المرور غير صحيحة"); }
         };
 
         // تحديث حالة الاتصال بالسحابة
         onValue(ref(db, '.info/connected'), (snap) => {
             const status = document.getElementById('cloud-status');
-            if(snap.val()) {
-                status.innerText = "Cloud Online";
-                status.className = "bg-green-500/10 text-green-500 border border-green-500/20 px-4 py-2 rounded-full text-xs font-bold uppercase";
+            if (snap.val()) {
+                status.innerHTML = `<span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span> Cloud Online`;
+                status.className = "flex items-center gap-3 bg-green-500/10 text-green-500 border border-green-500/20 px-6 py-2 rounded-full text-xs font-black uppercase";
             }
         });
 
-        // قراءة الملف ورفعه للسحابة
-        document.getElementById('excel-file').addEventListener('change', (e) => {
+        // قراءة الإكسيل ورفع البيانات للسحابة
+        document.getElementById('excel-uploader').addEventListener('change', (e) => {
             const reader = new FileReader();
-            reader.onload = (f) => {
-                const data = new Uint8Array(f.target.result);
-                const workbook = XLSX.read(data, {type: 'array'});
-                const list = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
+            reader.onload = (event) => {
+                const data = new Uint8Array(event.target.result);
+                const workbook = XLSX.read(data, { type: 'array' });
+                const rawList = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
                 
-                const cloudData = {};
-                list.forEach(s => {
-                    const id = String(s['University ID']).trim();
-                    cloudData[id] = {
-                        name: s['Name'],
-                        id: id,
-                        dept: s['Department'] || 'Marketing',
-                        year: s['Year'] || 'N/A'
-                    };
+                const cloudMap = {};
+                rawList.forEach(s => {
+                    const studentId = String(s['University ID'] || '').trim();
+                    if (studentId) {
+                        cloudMap[studentId] = {
+                            name: s['Name'] || 'غير مسجل',
+                            id: studentId,
+                            dept: s['Department'] || 'Marketing',
+                            year: s['Year'] || 'N/A',
+                            phone: s['Phone'] || 'N/A',
+                            parentPhone: s['Parent Phone'] || 'N/A'
+                        };
+                    }
                 });
 
-                set(ref(db, 'students'), cloudData)
-                    .then(() => alert("تم الحفظ بنجاح في السحابة!"))
-                    .catch(() => alert("فشل الحفظ! تأكد من إعدادات Firebase"));
+                set(ref(db, 'students'), cloudMap)
+                    .then(() => alert("تم تحديث كافة بيانات الطلاب في السحابة بنجاح!"))
+                    .catch(() => alert("حدث خطأ أثناء الرفع"));
             };
             reader.readAsArrayBuffer(e.target.files[0]);
         });
 
-        // جلب البيانات من السحابة للعرض (الضمان بأنها لم تتمسح)
-        function loadCloudData() {
+        // مزامنة عرض جدول المعاينة من السحابة مباشرة
+        function syncData() {
             onValue(ref(db, 'students'), (snap) => {
-                const tbody = document.getElementById('data-preview');
-                const count = document.getElementById('student-count');
+                const tbody = document.getElementById('preview-list');
+                const counter = document.getElementById('counter');
                 tbody.innerHTML = '';
-                if(snap.exists()) {
-                    const students = Object.values(snap.val());
-                    count.innerText = students.length;
-                    students.forEach(s => {
-                        tbody.innerHTML += `<tr class="hover:bg-slate-700/30">
-                            <td class="p-4 font-bold text-blue-400">${s.name}</td>
-                            <td class="p-4 text-slate-400">${s.id}</td>
-                            <td class="p-4 text-green-500 text-[10px] font-black uppercase">Stored</td>
-                        </tr>`;
+                if (snap.exists()) {
+                    const list = Object.values(snap.val());
+                    counter.innerText = `${list.length} طالب`;
+                    list.forEach(s => {
+                        tbody.innerHTML += `
+                            <tr class="hover:bg-slate-700/30 transition-colors">
+                                <td class="p-5 font-bold text-blue-400 text-right">${s.name}</td>
+                                <td class="p-5 text-center text-slate-400 font-mono">${s.id}</td>
+                                <td class="p-5 text-center"><span class="bg-green-500/20 text-green-500 text-[9px] font-black px-2 py-1 rounded">SYNCED</span></td>
+                            </tr>`;
                     });
                 }
             });
